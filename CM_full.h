@@ -6,7 +6,7 @@
  * CM_full.h - C Multitask Intelligent Library
  * Complete Single-File Implementation
  * Author: Adham Hossam
- * Version: 3.0.0
+ * Version: 3.1.1
  * ============================================================================
  */
 
@@ -227,6 +227,75 @@ static char cm_error_message[1024] = {0};
 #define CM_REPORT() cm_gc_stats()
 
 /* ============================================================================
+ * OOP MACROS - نظام البرمجة الكائنية (نسخة محسنة)
+ * ============================================================================ */
+
+// تعريف كلاس جديد
+#define class(name) \
+    typedef struct name name; \
+    struct name
+
+#define end_class ;
+
+// تعريف خاصية
+#define property(type, name) type name;
+
+// تعريف دالة
+#define method(name, return_type, ...) \
+    return_type (*name)(name* this, ##__VA_ARGS__);
+
+// استدعاء دالة
+#define send(obj, method, ...) ((obj)->method(obj, ##__VA_ARGS__))
+
+/* ============================================================================
+ * BUILT-IN CLASSES - كلاسات مدمجة (بدون ماكرو classc)
+ * ============================================================================ */
+
+// ----- String Class -----
+typedef struct String {
+    // الخصائص
+    char* data;
+    int length;
+    int capacity;
+    
+    // الدوال
+    struct String* (*concat)(struct String* this, const char* other);
+    struct String* (*upper)(struct String* this);
+    struct String* (*lower)(struct String* this);
+    void (*print)(struct String* this);
+    int (*length_func)(struct String* this);
+    char (*charAt)(struct String* this, int index);
+} String;
+
+// ----- Array Class -----
+typedef struct Array {
+    // الخصائص
+    void* data;
+    int element_size;
+    int length;
+    int capacity;
+    
+    // الدوال
+    struct Array* (*push)(struct Array* this, void* value);
+    void* (*pop)(struct Array* this);
+    void* (*get)(struct Array* this, int index);
+    int (*size)(struct Array* this);
+} Array;
+
+// ----- Map Class -----
+typedef struct Map {
+    // الخصائص
+    void* map_data;
+    int size;
+    
+    // الدوال
+    struct Map* (*set)(struct Map* this, const char* key, void* value);
+    void* (*get)(struct Map* this, const char* key);
+    int (*has)(struct Map* this, const char* key);
+    int (*size_func)(struct Map* this);
+} Map;
+
+/* ============================================================================
  * FUNCTION DECLARATIONS
  * ============================================================================ */
 void cm_gc_init(void);
@@ -260,12 +329,85 @@ size_t cm_map_size(cm_map_t* map);
 
 void cm_random_seed(unsigned int seed);
 void cm_random_string(char* buffer, size_t length);
+
+
+// ===== دوال Class =====
+String* String_new(const char* initial);
+void String_delete(String* self);
+String* string_concat(String* this, const char* other);
+String* string_upper(String* this);
+String* string_lower(String* this);
+void string_print(String* this);
+int string_length(String* this);
+char string_charAt(String* this, int index);
+
+Array* Array_new(int element_size, int capacity);
+void Array_delete(Array* self);
+Array* array_push(Array* this, void* value);
+void* array_pop(Array* this);
+void* array_get(Array* this, int index);
+int array_size(Array* this);
+
+Map* Map_new(void);
+void Map_delete(Map* self);
+Map* map_set(Map* this, const char* key, void* value);
+void* map_get(Map* this, const char* key);
+int map_has(Map* this, const char* key);
+int map_size_func(Map* this);
+
 /* Error handling functions */
 const char* cm_error_string(int error);
 const char* cm_error_get_message(void);
 int cm_error_get_last(void);
 void cm_error_clear(void);
 void cm_error_set(int error, const char* message);
+
+/* ============================================================================
+ * SHORT & EASY FUNCTION NAMES
+ * ============================================================================ */
+
+// الذاكرة - Memory
+#define cmAlloc(sz) cm_alloc(sz, "object", __FILE__, __LINE__)
+#define cmFree(ptr) cm_free(ptr)
+#define cmRetain(ptr) cm_retain(ptr)
+#define cmGC() cm_gc_collect()
+#define cmStats() cm_gc_stats()
+
+// النصوص - Strings
+#define cmStr(s) cm_string_new(s)
+#define cmStrFree(s) cm_string_free(s)
+#define cmStrLen(s) cm_string_length(s)
+#define cmStrFmt(...) cm_string_format(__VA_ARGS__)
+#define cmStrUpper(s) cm_string_upper(s)
+#define cmStrLower(s) cm_string_lower(s)
+
+// المصفوفات - Arrays
+#define cmArr(type, sz) cm_array_new(sizeof(type), sz)
+#define cmArrFree(a) cm_array_free(a)
+#define cmArrLen(a) cm_array_length(a)
+#define cmArrGet(a, i, type) (*(type*)cm_array_get(a, i))
+#define cmArrPush(a, type, v) do { type __tmp = (v); cm_array_push(a, &__tmp); } while(0)
+#define cmArrPop(a) cm_array_pop(a)
+
+// الخرائط - Maps
+#define cmMap() cm_map_new()
+#define cmMapFree(m) cm_map_free(m)
+#define cmMapSetInt(m, k, v) do { int __tmp = (v); cm_map_set(m, k, &__tmp, sizeof(int)); } while(0)
+#define cmMapSetStr(m, k, v) do { const char* __tmp = (v); cm_map_set(m, k, &__tmp, sizeof(const char*)); } while(0)
+#define cmMapGetInt(m, k) (*(int*)cm_map_get(m, k))
+#define cmMapGetStr(m, k) (*(char**)cm_map_get(m, k))
+#define cmMapHas(m, k) cm_map_has(m, k)
+
+// الأخطاء - Errors
+#define cmTry CM_TRY()
+#define cmCatch CM_CATCH()
+#define cmThrow(e, m) CM_THROW(e, m)
+#define cmErrorMsg() cm_error_get_message()
+#define cmErrorCode() cm_error_get_last()
+
+// عشوائيات - Random
+#define cmRandInt(min, max) (min + rand() % ((max) - (min) + 1))
+#define cmRandStr(buf, len) cm_random_string(buf, len)
 
 /* ============================================================================
  * IMPLEMENTATION
@@ -846,6 +988,179 @@ void cm_random_string(char* buffer, size_t length) {
 }
 
 /* ============================================================================
+ * CLASS IMPLEMENTATION - تنفيذ نظام OOP
+ * ============================================================================ */
+
+// ===== String Class Implementation =====
+String* string_concat(String* this, const char* other) {
+    if (!this || !other) return this;
+    int new_len = this->length + strlen(other);
+    char* new_data = (char*)cm_alloc(new_len + 1, "string_data", __FILE__, __LINE__);
+    strcpy(new_data, this->data);
+    strcat(new_data, other);
+    cm_free(this->data);
+    this->data = new_data;
+    this->length = new_len;
+    return this;
+}
+
+String* string_upper(String* this) {
+    if (!this || !this->data) return this;
+    for (int i = 0; i < this->length; i++) {
+        this->data[i] = toupper(this->data[i]);
+    }
+    return this;
+}
+
+String* string_lower(String* this) {
+    if (!this || !this->data) return this;
+    for (int i = 0; i < this->length; i++) {
+        this->data[i] = tolower(this->data[i]);
+    }
+    return this;
+}
+
+void string_print(String* this) {
+    if (this && this->data) printf("%s", this->data);
+}
+
+int string_length(String* this) {
+    return this ? this->length : 0;
+}
+
+char string_charAt(String* this, int index) {
+    if (!this || !this->data || index < 0 || index >= this->length) return '\0';
+    return this->data[index];
+}
+
+String* String_new(const char* initial) {
+    String* self = (String*)cm_alloc(sizeof(String), "String", __FILE__, __LINE__);
+    
+    int len = initial ? strlen(initial) : 0;
+    self->length = len;
+    self->capacity = len + 1;
+    self->data = (char*)cm_alloc(self->capacity, "string_data", __FILE__, __LINE__);
+    if (self->data && initial) {
+        strcpy(self->data, initial);
+    }
+    
+    // تعيين الدوال
+    self->concat = string_concat;
+    self->upper = string_upper;
+    self->lower = string_lower;
+    self->print = string_print;
+    self->length_func = string_length;
+    self->charAt = string_charAt;
+    
+    return self;
+}
+
+void String_delete(String* self) {
+    if (!self) return;
+    if (self->data) cm_free(self->data);
+    cm_free(self);
+}
+
+// ===== Array Class Implementation =====
+Array* array_push(Array* this, void* value) {
+    if (!this || !value) return this;
+    
+    if (this->length >= this->capacity) {
+        int new_cap = this->capacity * 2;
+        void* new_data = cm_alloc(this->element_size * new_cap, "array_data", __FILE__, __LINE__);
+        memcpy(new_data, this->data, this->element_size * this->length);
+        cm_free(this->data);
+        this->data = new_data;
+        this->capacity = new_cap;
+    }
+    
+    void* dest = (char*)this->data + (this->length * this->element_size);
+    memcpy(dest, value, this->element_size);
+    this->length++;
+    return this;
+}
+
+void* array_pop(Array* this) {
+    if (!this || this->length == 0) return NULL;
+    this->length--;
+    return (char*)this->data + (this->length * this->element_size);
+}
+
+void* array_get(Array* this, int index) {
+    if (!this || index < 0 || index >= this->length) return NULL;
+    return (char*)this->data + (index * this->element_size);
+}
+
+int array_size(Array* this) {
+    return this ? this->length : 0;
+}
+
+Array* Array_new(int element_size, int capacity) {
+    Array* self = (Array*)cm_alloc(sizeof(Array), "Array", __FILE__, __LINE__);
+    
+    self->element_size = element_size;
+    self->capacity = capacity > 0 ? capacity : 16;
+    self->length = 0;
+    self->data = cm_alloc(element_size * self->capacity, "array_data", __FILE__, __LINE__);
+    
+    // تعيين الدوال
+    self->push = array_push;
+    self->pop = array_pop;
+    self->get = array_get;
+    self->size = array_size;
+    
+    return self;
+}
+
+void Array_delete(Array* self) {
+    if (!self) return;
+    if (self->data) cm_free(self->data);
+    cm_free(self);
+}
+
+// ===== Map Class Implementation =====
+Map* map_set(Map* this, const char* key, void* value) {
+    if (!this || !key || !value) return this;
+    cm_map_set((cm_map_t*)this->map_data, key, value, sizeof(void*));
+    this->size = cm_map_size((cm_map_t*)this->map_data);
+    return this;
+}
+
+void* map_get(Map* this, const char* key) {
+    if (!this || !key) return NULL;
+    return cm_map_get((cm_map_t*)this->map_data, key);
+}
+
+int map_has(Map* this, const char* key) {
+    if (!this || !key) return 0;
+    return cm_map_has((cm_map_t*)this->map_data, key);
+}
+
+int map_size_func(Map* this) {
+    return this ? this->size : 0;
+}
+
+Map* Map_new(void) {
+    Map* self = (Map*)cm_alloc(sizeof(Map), "Map", __FILE__, __LINE__);
+    
+    self->map_data = cm_map_new();
+    self->size = 0;
+    
+    // تعيين الدوال
+    self->set = map_set;
+    self->get = map_get;
+    self->has = map_has;
+    self->size_func = map_size_func;
+    
+    return self;
+}
+
+void Map_delete(Map* self) {
+    if (!self) return;
+    if (self->map_data) cm_map_free((cm_map_t*)self->map_data);
+    cm_free(self);
+}
+/* ============================================================================
  * INITIALIZATION
  * ============================================================================ */
 __attribute__((constructor)) void cm_init_all(void) {
@@ -863,5 +1178,7 @@ __attribute__((destructor)) void cm_cleanup_all(void) {
         printf("\n✅ [CM] Clean shutdown - no memory leaks\n");
     }
 }
+
+
 
 #endif /* CM_FULL_H */
