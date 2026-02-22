@@ -1710,9 +1710,9 @@ SOFTWARE.
 
 Adham Hossam
 
-· GitHub: github.com/adhamhossam
-· Email: adham@example.com
-· Project: github.com/adhamhossam/CM
+· GitHub: github.com/ALightbolt4G
+· Email: adham.hossam5020@gmail.com
+· Project: github.com/ALightbolt4G/CM
 
 ---
 
