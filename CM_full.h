@@ -6,7 +6,7 @@
  * CM_full.h - C Multitask Intelligent Library
  * Complete Single-File Implementation
  * Author: Adham Hossam
- * Version: 3.1.1
+ * Version: 4.2.1
  * ============================================================================
  */
 
@@ -33,11 +33,12 @@
 #include <assert.h>
 #include <signal.h>
 #include <setjmp.h>
+#include <pthread.h>
 
 /* ============================================================================
  * CONFIGURATION
  * ============================================================================ */
-#define CM_VERSION "3.0.0"
+#define CM_VERSION "4.2.1"
 #define CM_AUTHOR "Adham Hossam"
 #define CM_GC_THRESHOLD (1024 * 1024)
 #define CM_LOG_LEVEL 3
@@ -93,20 +94,37 @@ struct CMObject {
     void (*mark_cb)(void*);
 };
 
-struct CMGC {
+// 1. تعريف الـ Arena أولاً
+typedef struct CMArena {
+    void* block;
+    size_t block_size;
+    size_t offset;
+    struct CMArena* next;
+    const char* name;
+    size_t peak_usage;  // 👈 ضيف ده
+} CMArena;
+
+// 2. النظام الشامل
+typedef struct {
     CMObject* head;
     CMObject* tail;
-    size_t total_objects;
     size_t total_memory;
+    size_t gc_last_collection;  // 👈 ضيف ده
+    pthread_mutex_t gc_lock;
+    CMArena* current_arena;
+    pthread_mutex_t arena_lock;
+    
     size_t peak_memory;
-    size_t collections;
     size_t allocations;
     size_t frees;
+    size_t collections;
     double avg_collection_time;
-    double total_collection_time;
-    int gc_enabled;
-    int gc_threshold;
-};
+    size_t total_objects;
+} CMMemorySystem;
+
+// المتغير العام الوحيد
+static CMMemorySystem cm_mem = {0};
+
 
 /* String Structure */
 struct cm_string {
@@ -150,7 +168,6 @@ struct cm_map {
 /* ============================================================================
  * GLOBAL VARIABLES
  * ============================================================================ */
-static CMGC cm_gc = {0};
 static jmp_buf* cm_exception_buffer = NULL;
 static int cm_last_error = 0;
 static char cm_error_message[1024] = {0};
@@ -158,6 +175,10 @@ static char cm_error_message[1024] = {0};
 /* ============================================================================
  * MACROS
  * ============================================================================ */
+ #define CM_WITH_ARENA(size) \
+    for (CMArena* _a = cm_arena_create(size); _a; (cm_arena_destroy(_a), _a = NULL)) \
+        for (int _i = (cm_arena_push(_a), 0); _i < 1; _i++)
+
  /* Error handling macros */
 #define CM_TRY() \
     jmp_buf __cm_buf; \
@@ -189,16 +210,17 @@ static char cm_error_message[1024] = {0};
 #define CM_ABOUT() \
     do { \
         printf("\n"); \
-        printf("╔════════════════════════════════════════════════════════════════════╗\n"); \
-        printf("║                 C MULTITASK INTELLIGENT LIBRARY                   ║\n"); \
-        printf("║                         by Adham Hossam                            ║\n"); \
-        printf("╠════════════════════════════════════════════════════════════════════╣\n"); \
-        printf("║ Version: %-45s ║\n", CM_VERSION); \
-        printf("║ Author:  %-45s ║\n", CM_AUTHOR); \
-        printf("╚════════════════════════════════════════════════════════════════════╝\n"); \
+        printf("_________________________________________________________\n"); \
+        printf("                                                     \n"); \
+        printf("        C MULTITASK INTELLIGENT LIBRARY             \n"); \
+        printf("                 by Adham Hossam                     \n"); \
+        printf("                                                     \n"); \
+        printf("--------------------------------------------------------\n"); \
+        printf("  Version : %s\n", CM_VERSION); \
+        printf("  Author  : %s\n", CM_AUTHOR); \
+        printf("_________________________________________________________\n"); \
         printf("\n"); \
     } while(0)
-
 /* String macros */
 #define CM_STR(s) cm_string_new(s)
 #define CM_STR_FREE(s) cm_string_free(s)
@@ -415,15 +437,70 @@ void cm_error_set(int error, const char* message);
 
 /* GC Implementation */
 void cm_gc_init(void) {
-    memset(&cm_gc, 0, sizeof(CMGC));
-    cm_gc.gc_enabled = 1;
-    cm_gc.gc_threshold = CM_GC_THRESHOLD;
-    printf("[GC] Initialized with threshold: %d bytes\n", cm_gc.gc_threshold);
+    memset(&cm_mem, 0, sizeof(CMMemorySystem)); 
+    pthread_mutex_init(&cm_mem.gc_lock, NULL);
+    pthread_mutex_init(&cm_mem.arena_lock, NULL);
+    // مفيش حاجة اسمها cm_mem.gc_enabled خلاص
 }
+
+
+
+// ضيف دول قبل cm_alloc
+CMArena* cm_arena_create(size_t size) {
+    CMArena* arena = (CMArena*)malloc(sizeof(CMArena));
+    if (!arena) return NULL;
+    arena->block = malloc(size);
+    if (!arena->block) { free(arena); return NULL; }
+    arena->block_size = size;
+    arena->offset = 0;
+    arena->name = "dynamic_arena";
+    arena->next = NULL;
+    return arena;
+}
+
+void cm_arena_destroy(CMArena* arena) {
+    if (!arena) return;
+    if (arena->block) free(arena->block);
+    free(arena);
+}
+
+void cm_arena_push(CMArena* arena) {
+    pthread_mutex_lock(&cm_mem.arena_lock);
+    cm_mem.current_arena = arena;
+    pthread_mutex_unlock(&cm_mem.arena_lock);
+}
+
+void cm_arena_pop(void) {
+    pthread_mutex_lock(&cm_mem.arena_lock);
+    cm_mem.current_arena = NULL; // أو ترجع للـ parent لو عملت نظام شجري
+    pthread_mutex_unlock(&cm_mem.arena_lock);
+}
+
 
 void* cm_alloc(size_t size, const char* type, const char* file, int line) {
     if (size == 0) return NULL;
-    
+
+    // 🚀 أولاً: فحص نظام الـ Arena (السرعة القصوى)
+    if (cm_mem.current_arena) {
+        // محاذاة الذاكرة لـ 8 بايت عشان الأداء ومشاكل الـ Alignment
+        size_t aligned_size = (size + 7) & ~7;
+        
+        if (cm_mem.current_arena->offset + aligned_size <= cm_mem.current_arena->block_size) {
+            void* ptr = (char*)cm_mem.current_arena->block + cm_mem.current_arena->offset;
+            cm_mem.current_arena->offset += aligned_size;
+            
+            // تحديث إحصائيات الـ Arena لو حابب
+            if (cm_mem.current_arena->offset > cm_mem.current_arena->peak_usage) {
+                cm_mem.current_arena->peak_usage = cm_mem.current_arena->offset;
+            }
+            
+            return ptr; // اخرج فوراً، مش محتاجين نسجل في الـ GC
+        }
+        // لو الـ Arena اتملت، ممكن نخليه يحجز من الـ GC كـ Fallback
+        fprintf(stderr, "[ARENA] Warning: Arena '%s' full, falling back to GC\n", cm_mem.current_arena->name);
+    }
+
+    // 🐢 ثانياً: نظام الـ GC التقليدي (لو مفيش Arena أو اتملت)
     void* ptr = malloc(size);
     if (!ptr) return NULL;
     
@@ -433,6 +510,7 @@ void* cm_alloc(size_t size, const char* type, const char* file, int line) {
         return NULL;
     }
     
+    // تعبئة بيانات الكائن
     obj->ptr = ptr;
     obj->size = size;
     obj->type = type ? type : "unknown";
@@ -447,29 +525,37 @@ void* cm_alloc(size_t size, const char* type, const char* file, int line) {
     obj->destructor = NULL;
     obj->mark_cb = NULL;
     
-    if (cm_gc.tail) {
-        cm_gc.tail->next = obj;
-        obj->prev = cm_gc.tail;
-        cm_gc.tail = obj;
-    } else {
-        cm_gc.head = cm_gc.tail = obj;
+    // 🔒 قفل الـ GC (استخدام المبدأ الجديد cm_mem)
+    pthread_mutex_lock(&cm_mem.gc_lock); // الاسم الجديد في الـ Struct
+if (cm_mem.tail) {
+    cm_mem.tail->next = obj;
+    obj->prev = cm_mem.tail;
+    cm_mem.tail = obj;
+} else {
+    cm_mem.head = cm_mem.tail = obj;
+}
+    
+    cm_mem.total_objects++;
+    cm_mem.total_memory += size;
+    cm_mem.allocations++;
+    
+    if (cm_mem.total_memory > cm_mem.peak_memory) {
+        cm_mem.peak_memory = cm_mem.total_memory;
     }
     
-    cm_gc.total_objects++;
-    cm_gc.total_memory += size;
-    cm_gc.allocations++;
-    
-    if (cm_gc.total_memory > cm_gc.peak_memory) {
-        cm_gc.peak_memory = cm_gc.total_memory;
-    }
+    pthread_mutex_unlock(&cm_mem.gc_lock);
     
     return ptr;
 }
 
+
 void cm_free(void* ptr) {
     if (!ptr) return;
     
-    for (CMObject* obj = cm_gc.head; obj; obj = obj->next) {
+    // 🔒 قفل - البحث والتعديل
+    pthread_mutex_lock(&cm_mem.gc_lock);  // ✅ صح
+    
+    for (CMObject* obj = cm_mem.head; obj; obj = obj->next) {
         if (obj->ptr == ptr) {
             obj->ref_count--;
             
@@ -483,90 +569,148 @@ void cm_free(void* ptr) {
                 if (obj->prev) {
                     obj->prev->next = obj->next;
                 } else {
-                    cm_gc.head = obj->next;
+                    cm_mem.head = obj->next;
                 }
                 
                 if (obj->next) {
                     obj->next->prev = obj->prev;
                 } else {
-                    cm_gc.tail = obj->prev;
+                    cm_mem.tail = obj->prev;
                 }
                 
-                cm_gc.total_objects--;
-                cm_gc.total_memory -= obj->size;
-                cm_gc.frees++;
+                cm_mem.total_objects--;
+                cm_mem.total_memory -= obj->size;
+                cm_mem.frees++;
                 
                 free(obj);
             }
+            
+            // 🔓 فتح القفل قبل الخروج
+            pthread_mutex_unlock(&cm_mem.gc_lock);  // ✅ صح
             return;
         }
     }
     
     free(ptr);
+    // 🔓 فتح القفل لو الكائن مش موجود
+    pthread_mutex_unlock(&cm_mem.gc_lock);  // ✅ صح
 }
 
 void cm_gc_collect(void) {
-    if (!cm_gc.gc_enabled) return;
+ //   if (!cm_mem.gc_enabled) return;
+    
+    // 🔒 قفل - GC محتاج تحكم كامل
+    pthread_mutex_lock(&cm_mem.gc_lock);
     
     printf("[GC] Starting collection...\n");
     
-    // ✅ فقط للـ shutdown: احذف كل الكائنات
-    CMObject* current = cm_gc.head;
+    // Mark phase - بمناسبة الكائنات
+    for (CMObject* obj = cm_mem.head; obj; obj = obj->next) {
+        obj->marked = (obj->ref_count > 0) ? 1 : 0;
+    }
+    
+    // Sweep phase - تنظيف
+    CMObject* current = cm_mem.head;
     size_t freed_memory = 0;
     int freed_objects = 0;
+    
+    
     
     while (current) {
         CMObject* next = current->next;
         
-        freed_memory += current->size;
-        freed_objects++;
-        
-        if (current->destructor) {
-            current->destructor(current->ptr);
+        if (!current->marked) {
+            freed_memory += current->size;
+            freed_objects++;
+            
+            if (current->destructor) {
+                current->destructor(current->ptr);
+            }
+            free(current->ptr);
+            
+            if (current->prev) {
+                current->prev->next = current->next;
+            } else {
+                cm_mem.head = current->next;
+            }
+            
+            if (current->next) {
+                current->next->prev = current->prev;
+            } else {
+                cm_mem.tail = current->prev;
+            }
+            
+            cm_mem.total_objects--;
+            cm_mem.total_memory -= current->size;
+            cm_mem.frees++;
+            
+            free(current);
         }
-        free(current->ptr);
         
-        // احذف الكائن نفسه
-        cm_gc.total_objects--;
-        cm_gc.total_memory -= current->size;
-        cm_gc.frees++;
-        
-        CMObject* to_free = current;
         current = next;
-        free(to_free);
     }
-    
-    cm_gc.head = NULL;
-    cm_gc.tail = NULL;
-    cm_gc.collections++;
+    cm_mem.gc_last_collection = freed_memory;
+    cm_mem.collections++;
     
     printf("[GC] Completed: freed %d objects (%zu bytes)\n", 
            freed_objects, freed_memory);
+    
+    // 🔓 فتح القفل
+    pthread_mutex_unlock(&cm_mem.gc_lock);
 }
 
+
 void cm_gc_stats(void) {
+    pthread_mutex_lock(&cm_mem.gc_lock);
+    
     printf("\n");
-    printf("╔════════════════════════════════════════════════════════════╗\n");
-    printf("║              GARBAGE COLLECTOR STATISTICS                 ║\n");
-    printf("╠════════════════════════════════════════════════════════════╣\n");
-    printf("║ Total objects:    %20zu                              ║\n", cm_gc.total_objects);
-    printf("║ Total memory:     %20zu bytes                         ║\n", cm_gc.total_memory);
-    printf("║ Peak memory:      %20zu bytes                         ║\n", cm_gc.peak_memory);
-    printf("║ Allocations:      %20zu                              ║\n", cm_gc.allocations);
-    printf("║ Frees:            %20zu                              ║\n", cm_gc.frees);
-    printf("║ Collections:      %20zu                              ║\n", cm_gc.collections);
-    printf("╚════════════════════════════════════════════════════════════╝\n");
+    printf("══════════════════════════════════════════════════════════════\n");
+    printf("              GARBAGE COLLECTOR STATISTICS\n");
+    printf("──────────────────────────────────────────────────────────────\n");
+    printf("  Total objects    │ %20zu\n", cm_mem.total_objects);
+    printf("  Total memory     │ %20zu bytes\n", cm_mem.total_memory);
+    printf("  Peak memory      │ %20zu bytes\n", cm_mem.peak_memory);
+    printf("  Allocations      │ %20zu\n", cm_mem.allocations);
+    printf("  Frees            │ %20zu\n", cm_mem.frees);
+    printf("  Collections      │ %20zu\n", cm_mem.collections);
+    printf("──────────────────────────────────────────────────────────────\n");
+    printf("  Avg collection   │ %19.3f ms\n", cm_mem.avg_collection_time * 1000);
+    printf("  Last freed       │ %20zu bytes\n", cm_mem.gc_last_collection);
+    printf("══════════════════════════════════════════════════════════════\n");
+    
+    if (cm_mem.total_objects > 0 && CM_LOG_LEVEL >= 3) {
+        printf("\nACTIVE OBJECTS:\n");
+        printf("──────────────────────────────────────────────────────────────\n");
+        int i = 0;
+        for (CMObject* obj = cm_mem.head; obj; obj = obj->next) {
+            printf("  [%d] %s (%zu bytes) at %s:%d [refs: %d]\n",
+                   ++i,
+                   obj->type ? obj->type : "unknown",
+                   obj->size,
+                   obj->file ? obj->file : "unknown",
+                   obj->line,
+                   obj->ref_count);
+        }
+    }
+    
+    pthread_mutex_unlock(&cm_mem.gc_lock);  // ✅ صح
 }
 
 void cm_retain(void* ptr) {
     if (!ptr) return;
     
-    for (CMObject* obj = cm_gc.head; obj; obj = obj->next) {
+    // 🔒 قفل
+    pthread_mutex_lock(&cm_mem.gc_lock);
+    
+    for (CMObject* obj = cm_mem.head; obj; obj = obj->next) {
         if (obj->ptr == ptr) {
             obj->ref_count++;
             break;
         }
     }
+    
+    // 🔓 فتح القفل
+    pthread_mutex_unlock(&cm_mem.gc_lock);
 }
 
 /* ============================================================================
@@ -1171,12 +1315,14 @@ __attribute__((constructor)) void cm_init_all(void) {
 
 __attribute__((destructor)) void cm_cleanup_all(void) {
     cm_gc_collect();
-    if (cm_gc.total_objects > 0) {
-        printf("\n⚠️ [CM] Warning: %zu objects still alive\n", cm_gc.total_objects);
+    if (cm_mem.total_objects > 0) {
+        printf("\n⚠️ [CM] Warning: %zu objects still alive\n", cm_mem.total_objects);
         cm_gc_stats();
     } else {
         printf("\n✅ [CM] Clean shutdown - no memory leaks\n");
     }
+    pthread_mutex_destroy(&cm_mem.gc_lock);
+pthread_mutex_destroy(&cm_mem.arena_lock);
 }
 
 
