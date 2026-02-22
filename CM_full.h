@@ -368,10 +368,7 @@ void cm_gc_collect(void) {
     
     printf("[GC] Starting collection...\n");
     
-    for (CMObject* obj = cm_gc.head; obj; obj = obj->next) {
-        obj->marked = (obj->ref_count > 0) ? 1 : 0;
-    }
-    
+    // ✅ فقط للـ shutdown: احذف كل الكائنات
     CMObject* current = cm_gc.head;
     size_t freed_memory = 0;
     int freed_objects = 0;
@@ -379,37 +376,26 @@ void cm_gc_collect(void) {
     while (current) {
         CMObject* next = current->next;
         
-        if (!current->marked) {
-            freed_memory += current->size;
-            freed_objects++;
-            
-            if (current->destructor) {
-                current->destructor(current->ptr);
-            }
-            free(current->ptr);
-            
-            if (current->prev) {
-                current->prev->next = current->next;
-            } else {
-                cm_gc.head = current->next;
-            }
-            
-            if (current->next) {
-                current->next->prev = current->prev;
-            } else {
-                cm_gc.tail = current->prev;
-            }
-            
-            cm_gc.total_objects--;
-            cm_gc.total_memory -= current->size;
-            cm_gc.frees++;
-            
-            free(current);
-        }
+        freed_memory += current->size;
+        freed_objects++;
         
+        if (current->destructor) {
+            current->destructor(current->ptr);
+        }
+        free(current->ptr);
+        
+        // احذف الكائن نفسه
+        cm_gc.total_objects--;
+        cm_gc.total_memory -= current->size;
+        cm_gc.frees++;
+        
+        CMObject* to_free = current;
         current = next;
+        free(to_free);
     }
     
+    cm_gc.head = NULL;
+    cm_gc.tail = NULL;
     cm_gc.collections++;
     
     printf("[GC] Completed: freed %d objects (%zu bytes)\n", 
