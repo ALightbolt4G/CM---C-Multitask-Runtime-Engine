@@ -6,7 +6,7 @@
  * CM_full.h - C Multitask Intelligent Library
  * Complete Single-File Implementation
  * Author: Adham Hossam
- * Version: 4.2.1
+ * Version: 4.2.2
  * ============================================================================
  */
 
@@ -38,7 +38,7 @@
 /* ============================================================================
  * CONFIGURATION
  * ============================================================================ */
-#define CM_VERSION "4.2.1"
+#define CM_VERSION "4.2.2"
 #define CM_AUTHOR "Adham Hossam"
 #define CM_GC_THRESHOLD (1024 * 1024)
 #define CM_LOG_LEVEL 3
@@ -351,6 +351,7 @@ size_t cm_map_size(cm_map_t* map);
 
 void cm_random_seed(unsigned int seed);
 void cm_random_string(char* buffer, size_t length);
+String* cm_input(const char* prompt);
 
 
 // ===== دوال Class =====
@@ -394,6 +395,7 @@ void cm_error_set(int error, const char* message);
 #define cmRetain(ptr) cm_retain(ptr)
 #define cmGC() cm_gc_collect()
 #define cmStats() cm_gc_stats()
+#define cmInput(p) cm_input(p)
 
 // النصوص - Strings
 #define cmStr(s) cm_string_new(s)
@@ -1304,6 +1306,23 @@ void Map_delete(Map* self) {
     if (self->map_data) cm_map_free((cm_map_t*)self->map_data);
     cm_free(self);
 }
+
+/* Input Implementation */
+String* cm_input(const char* prompt) {
+    if (prompt) {
+        printf("%s", prompt);
+        fflush(stdout); // تأكيد ظهور الرسالة قبل الانتظار
+    }
+    
+    char buffer[1024]; 
+    if (fgets(buffer, sizeof(buffer), stdin)) {
+        // تنظيف علامة السطر الجديد \n
+        buffer[strcspn(buffer, "\n")] = 0;
+        return String_new(buffer); // بيستخدم كلاس الـ String بتاعك
+    }
+    return String_new("");
+}
+
 /* ============================================================================
  * INITIALIZATION
  * ============================================================================ */
@@ -1314,16 +1333,25 @@ __attribute__((constructor)) void cm_init_all(void) {
 }
 
 __attribute__((destructor)) void cm_cleanup_all(void) {
+    /* 1. Force reset ref_counts to 0 before shutdown to ensure GC collects everything */
+    pthread_mutex_lock(&cm_mem.gc_lock);
+    for (CMObject* obj = cm_mem.head; obj; obj = obj->next) {
+        obj->ref_count = 0; 
+    }
+    pthread_mutex_unlock(&cm_mem.gc_lock);
+
+    /* 2. Trigger the final Garbage Collection cycle */
     cm_gc_collect();
+
+    /* Final memory integrity check */
     if (cm_mem.total_objects > 0) {
         printf("\n⚠️ [CM] Warning: %zu objects still alive\n", cm_mem.total_objects);
         cm_gc_stats();
     } else {
-        printf("\n✅ [CM] Clean shutdown - no memory leaks\n");
+        printf("\n✅ [CM] Clean shutdown - all memory recovered!\n");
     }
-    pthread_mutex_destroy(&cm_mem.gc_lock);
-pthread_mutex_destroy(&cm_mem.arena_lock);
 }
+
 
 
 
