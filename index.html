@@ -59,7 +59,7 @@
             transition: background-color 0.3s, color 0.2s;
         }
 
-        /* Header */
+        /* ===== Header ===== */
         .header {
             position: sticky;
             top: 0;
@@ -100,6 +100,17 @@
             margin-left: 1rem;
         }
 
+        /* ===== Mobile Menu Button ===== */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+
         .theme-toggle {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
@@ -116,7 +127,7 @@
             background: var(--bg-tertiary);
         }
 
-        /* Layout */
+        /* ===== Layout ===== */
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -126,7 +137,7 @@
             gap: 2rem;
         }
 
-        /* Sidebar */
+        /* ===== Sidebar ===== */
         .sidebar {
             position: sticky;
             top: 90px;
@@ -136,6 +147,7 @@
             border-radius: 24px;
             border: 1px solid var(--border);
             padding: 1.5rem;
+            transition: left 0.3s ease;
         }
 
         .sidebar h3 {
@@ -181,7 +193,24 @@
             color: var(--accent-danger);
         }
 
-        /* Main Content */
+        /* ===== Sidebar Overlay ===== */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
+            z-index: 90;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ===== Main Content ===== */
         .main-content {
             min-width: 0;
         }
@@ -207,7 +236,7 @@
             font-size: 1.8rem;
         }
 
-        /* Cards */
+        /* ===== Cards ===== */
         .card-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -244,7 +273,7 @@
             font-size: 1.25rem;
         }
 
-        /* Tables */
+        /* ===== Tables ===== */
         .table {
             width: 100%;
             border-collapse: collapse;
@@ -275,7 +304,7 @@
             background: var(--bg-tertiary);
         }
 
-        /* Code blocks */
+        /* ===== Code blocks ===== */
         pre {
             background: var(--bg-code);
             color: var(--code-text);
@@ -287,6 +316,7 @@
             line-height: 1.5;
             margin: 1.5rem 0;
             border: 1px solid var(--border);
+            max-width: 100%;
         }
 
         .inline-code {
@@ -298,7 +328,7 @@
             font-size: 0.9rem;
         }
 
-        /* Issue badges */
+        /* ===== Issue badges ===== */
         .issue-severity {
             display: inline-block;
             padding: 0.25rem 0.75rem;
@@ -328,7 +358,7 @@
             color: white;
         }
 
-        /* Example box */
+        /* ===== Example box ===== */
         .example-box {
             background: var(--bg-tertiary);
             border-left: 4px solid var(--accent-info);
@@ -345,7 +375,7 @@
             border-left-color: var(--accent-danger);
         }
 
-        /* Tags */
+        /* ===== Tags ===== */
         .tag {
             display: inline-block;
             padding: 0.2rem 0.75rem;
@@ -371,7 +401,7 @@
             color: white;
         }
 
-        /* Floating effect */
+        /* ===== Animations ===== */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -381,13 +411,99 @@
             animation: fadeIn 0.6s ease forwards;
         }
 
-        /* Responsive */
-        @media (max-width: 900px) {
+        /* ===== Smooth Scroll Native ===== */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* ===== Responsive Design ===== */
+        @media (max-width: 1024px) {
             .container {
                 grid-template-columns: 1fr;
+                padding: 1rem;
             }
+
+            .menu-toggle {
+                display: block;
+            }
+
             .sidebar {
-                display: none;
+                position: fixed;
+                left: -100%;
+                top: 0;
+                height: 100%;
+                width: 280px;
+                border-radius: 0 24px 24px 0;
+                transition: left 0.3s ease;
+                z-index: 100;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-content {
+                padding-top: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            pre {
+                font-size: 0.8rem;
+                padding: 1rem;
+            }
+
+            .table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .header-content {
+                gap: 0.5rem;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            .logo i {
+                font-size: 1.5rem;
+            }
+
+            .version {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.6rem;
+                margin-left: 0.5rem;
+            }
+
+            .theme-toggle {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+            }
+
+            .example-box {
+                padding: 1rem;
             }
         }
     </style>
@@ -395,9 +511,14 @@
 <body>
     <header class="header">
         <div class="header-content">
-            <div class="logo">
-                <i class="fas fa-brain"></i>
-                <span>CM Library <span class="version">v4.2.1</span></span>
+            <div style="display: flex; align-items: center;">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">
+                    <i class="fas fa-brain"></i>
+                    <span>CM Library <span class="version">v4.2.1</span></span>
+                </div>
             </div>
             <div class="theme-toggle" id="themeToggle">
                 <i class="fas fa-moon"></i>
@@ -407,8 +528,11 @@
     </header>
 
     <div class="container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
         <!-- Sidebar Navigation -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <h3><i class="fas fa-compass"></i> Navigation</h3>
             <ul class="sidebar-nav">
                 <li><a href="#overview"><i class="fas fa-home"></i> Overview</a></li>
@@ -1311,26 +1435,40 @@ int main() {
             localStorage.setItem('cm-theme', theme);
         }
 
-        const savedTheme = localStorage.getItem('cm-theme') || 'light';
-        setTheme(savedTheme);
+        setTheme(localStorage.getItem('cm-theme') || 'light');
 
         themeToggle.addEventListener('click', () => {
             setTheme(body.classList.contains('dark') ? 'light' : 'dark');
         });
 
-        // Smooth scrolling
+        // Mobile Sidebar
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+        }
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+
+        // Close sidebar after click (mobile)
         document.querySelectorAll('.sidebar-nav a').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetId = link.getAttribute('href').substring(1);
-                const target = document.getElementById(targetId);
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
                 }
             });
         });
 
-        // Fade in on scroll
+        // Intersection Observer for fade-in
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -1339,7 +1477,7 @@ int main() {
             });
         }, { threshold: 0.1 });
 
-        document.querySelectorAll('.section').forEach(section => {
+        document.querySelectorAll('.section:not(.fade-in)').forEach(section => {
             observer.observe(section);
         });
     </script>
