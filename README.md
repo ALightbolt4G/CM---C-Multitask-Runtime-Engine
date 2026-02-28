@@ -1,4 +1,4 @@
-📚 CM Library v4.2.2 Documentation
+📚 CM Library v4.2.3 Documentation
 
 <div align="center">
 
@@ -6,7 +6,7 @@
 
 The Ultimate C Programming Intelligence Layer
 
-Version 4.2.2 | By Adham Hossam | 3000+ LOC | 100% Memory Safe
+Version 4.2.3 | By Adham Hossam | 3000+ LOC | 100% Memory Safe
 
 ```
 ⚡ FAST  |  🛡️ SAFE  |  🧠 SMART  |  🔒 THREAD-SAFE
@@ -1215,6 +1215,45 @@ C++ class conflict ✅ cmlass instead
 
 ---
 
+## 🎯 WHAT'S NEW IN v4.2.3 new update
+
+This release focuses on hardening the library, fixing critical bugs, and ensuring full compatibility with C++ environments. The key improvements include complete thread-safety for exceptions, a leak-proof arena macro, and a more robust, portable object-oriented programming system.
+
+### ✨ Key Improvements & New Features
+
+| Feature | Description |
+|---------|-------------|
+| **🔒 Thread-Local Exceptions** | The exception handling system (`CM_TRY`/`CM_THROW`) is now fully thread-safe. It uses a `__thread`-local buffer, eliminating the previous race condition where one thread could overwrite another's exception context. |
+| **🧹 Fixed `CM_WITH_ARENA`** | The arena macro has been redesigned to guarantee cleanup even when the block is exited via `break`, `return`, or `goto`. It now uses a cleanup attribute, preventing memory leaks in all scenarios. |
+| **🏷️ `cmlass` Macro** | The OOP macro `class` has been renamed to `cmlass` to avoid conflicts with the reserved keyword in C++. This makes the library safe and easy to use in mixed C/C++ projects. |
+| **➕ `method0` Macro** | A new macro has been introduced for defining class methods that take zero parameters, solving the previous limitation of the variadic `method` macro. |
+| **🛡️ Safe `send` Macro** | The `send` macro is now safer and checks if the method pointer is `NULL` before calling, preventing potential crashes. It also handles methods with and without parameters correctly. |
+| **📝 Unified `self` Parameter** | All method signatures in the OOP classes (`String`, `Array`, `Map`) now consistently use `self` as the first parameter name, replacing the confusing and C++-conflicting `this`. |
+| **🔧 Portable Code** | Removed all GNU-specific `##__VA_ARGS__` extensions from the macros, ensuring the library is fully portable and compiles with any standard C compiler. |
+| **📱 Android Support** | Added safe I/O functions (`cm_printf`, `cm_error`, `cm_gets`) with proper fallbacks for Android, ensuring library functions work correctly in environments where `stdout`/`stdin` might behave differently. |
+
+### ✅ Bug Fixes in v4.2.2
+
+| Issue | Location | Status |
+|-------|----------|--------|
+| Thread-unsafe exception buffer (`jmp_buf`) | `CM_TRY`/`CM_THROW` | ✅ **FIXED** with `__thread` storage |
+| Memory leak in `CM_WITH_ARENA` on early exit | Arena macros | ✅ **FIXED** with cleanup attribute |
+| C++ conflict with `class` keyword | OOP Macros | ✅ **FIXED** using `cmlass` |
+| Inability to define zero-parameter methods | `method` macro | ✅ **FIXED** with new `method0` macro |
+| GNU extensions (`##__VA_ARGS__`) | Macros | ✅ **FIXED** by using standard `__VA_ARGS__` |
+| Confusing `this` parameter name | OOP Classes | ✅ **FIXED** by renaming to `self` |
+
+### 🎯 Migration Guide from v4.2.1
+
+If you are upgrading from version 4.2.1, the only breaking change is the OOP macro:
+
+*   **Old (v4.2.1):** `class(Person) { ... };`
+*   **New (v4.2.2):** `cmlass(Person) { ... };`
+
+Simply replace all `class` definitions with `cmlass`. All other APIs remain backward compatible.
+
+
+
 📦 VERSION HISTORY
 
 Version Date Changes
@@ -1279,7 +1318,7 @@ The Ultimate C Programming Intelligence Layer
 
 ⭐ If you find this library useful, please star it on GitHub! ⭐
 
-https://img.shields.io/badge/Download-CM_Library_v4.2.2-blue
+https://img.shields.io/badge/Download-CM_Library_v4.2.3-blue
 
 ---
 
