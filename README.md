@@ -1215,9 +1215,7 @@ C++ class conflict ✅ cmlass instead
 
 ---
 
-## 🎯 WHAT'S NEW IN v4.2.3 new update
 
-This release focuses on hardening the library, fixing critical bugs, and ensuring full compatibility with C++ environments. The key improvements include complete thread-safety for exceptions, a leak-proof arena macro, and a more robust, portable object-oriented programming system.
 
 ### ✨ Key Improvements & New Features
 
@@ -1252,7 +1250,56 @@ If you are upgrading from version 4.2.1, the only breaking change is the OOP mac
 
 Simply replace all `class` definitions with `cmlass`. All other APIs remain backward compatible.
 
+## 🎯 WHAT'S NEW IN v4.2.3
 
+This release focuses on final hardening, cross-platform compatibility (especially for Android), and squashing the last few bugs to ensure a smooth, warning-free experience across all environments.
+
+### ✨ Key Improvements & New Features
+
+| Feature | Description |
+|---------|-------------|
+| **📱 Complete Android Support** | Added safe I/O functions (`cm_printf`, `cm_error`, `cm_gets`) with proper fallbacks. `cm_error` now prints to the console on Android in addition to logs, and `cm_gets` successfully reads user input from `stdin`. |
+| **🛡️ `NULL`-Safe Print Functions** | `cm_printf` and `cm_error` now gracefully handle `NULL` format strings, preventing potential crashes. |
+| **🧹 Zero Warnings** | Fixed all remaining compiler warnings, including the "unused parameter" warnings in `cm_gets` for Android builds by adding explicit `(void)` casts. |
+| **🖨️ Reliable String Printing** | The `string_print` method now uses direct `printf` for guaranteed output on all platforms, solving the previous issue where strings wouldn't display on some systems. |
+| **🔧 Portable I/O** | The safe I/O functions are now declared in `CM.h`, making them available for general use in any application code, not just internally within the library. |
+
+### ✅ Bug Fixes in v4.2.3
+
+| Issue | Location | Status |
+|-------|----------|--------|
+| `cm_printf` with `NULL` format string caused crash | `cm_printf` | ✅ **FIXED** with `NULL` check |
+| `cm_error` output not visible on Android console | `cm_error` | ✅ **FIXED** by adding direct `printf` fallback |
+| `cm_gets` failed to read input on Android | `cm_gets` | ✅ **FIXED** by attempting `fgets` from `stdin` |
+| Unused parameter warnings in Android builds | `cm_gets` | ✅ **FIXED** with `(void)` casts |
+| String content not printing in `string_print` | `string_print` | ✅ **FIXED** by using `printf` directly |
+| Safe I/O functions (`cm_printf`) not accessible from `main.c` | Header declarations | ✅ **FIXED** by adding prototypes to `CM.h` |
+
+### 📝 What's Next?
+
+With version 4.2.3, the CM Library has achieved a state of high stability and cross-platform robustness. Future work will focus on:
+
+- Expanding the collection of utility functions
+- Adding more comprehensive examples and tutorials
+- Performance benchmarking and optimization
+
+### 🎯 Migration Guide from v4.2.2
+
+This is a minor release focused on fixes and internal hardening. **No breaking changes or API modifications** are required. Simply drop in the new `CM.h` and `CM.c` files and recompile.
+
+---
+
+📦 **VERSION HISTORY**
+
+| Version | Date | Changes |
+|---------|------|---------|
+| **4.2.3** | 2026 | 🚀 **Latest Release:** Complete Android support, NULL-safe printing, zero warnings, and reliable string I/O. |
+| 4.2.2 | 2026 | 🚀 Thread-local exceptions, fixed arena cleanup, `cmlass` macro |
+| 4.2.1 | 2026 | 🚀 Arena allocator, unified memory system |
+| 4.0.0 | 2026 | 🔒 Thread safety, OOP macros |
+| 3.0.0 | 2026 | ♻️ Complete rewrite, GC, classes |
+| 2.0.0 | 2025 | 📊 Basic memory tracking |
+| 1.0.0 | 2025 | 🎯 Initial release |
 
 📦 VERSION HISTORY
 
