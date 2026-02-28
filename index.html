@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CM Library v4.2.2 - Advanced C Framework Documentation</title>
+    <title>CM Library v4.2.3 - Advanced C Framework Documentation</title>
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -21,7 +21,7 @@
             --bg-primary: #fafbfc;
             --bg-secondary: #ffffff;
             --bg-tertiary: #f0f3f8;
-            --bg-code: #0d1117;
+            --bg-code: #1e1e1e;
             --text-primary: #1e293b;
             --text-secondary: #475569;
             --text-muted: #64748b;
@@ -33,23 +33,29 @@
             --border: #e2e8f0;
             --card-shadow: 0 20px 30px -10px rgba(0,0,0,0.1);
             --header-bg: rgba(255,255,255,0.9);
-            --code-text: #e2e8f0;
-            --table-stripe: #f8fafc;
+            
+            /* VS Code Colors */
+            --code-keyword: #569cd6;
+            --code-function: #dcdcaa;
+            --code-string: #ce9178;
+            --code-comment: #6a9955;
+            --code-number: #b5cea8;
+            --code-type: #4ec9b0;
+            --code-preprocessor: #c586c0;
+            --code-operator: #d4d4d4;
         }
 
         body.dark {
             --bg-primary: #0b1120;
             --bg-secondary: #1e293b;
             --bg-tertiary: #2d3a4f;
-            --bg-code: #020617;
+            --bg-code: #1e1e1e;
             --text-primary: #f1f5f9;
             --text-secondary: #cbd5e1;
             --text-muted: #94a3b8;
             --border: #334155;
             --card-shadow: 0 20px 30px -10px rgba(0,0,0,0.6);
             --header-bg: rgba(15,23,42,0.9);
-            --code-text: #e2e8f0;
-            --table-stripe: #1e293b;
         }
 
         body {
@@ -305,10 +311,10 @@
             background: var(--bg-tertiary);
         }
 
-        /* ===== Code blocks ===== */
+        /* ===== VS Code Syntax Highlighting ===== */
         pre {
             background: var(--bg-code);
-            color: var(--code-text);
+            color: #d4d4d4;
             padding: 1.5rem;
             border-radius: 16px;
             overflow-x: auto;
@@ -319,6 +325,56 @@
             border: 1px solid var(--border);
             max-width: 100%;
         }
+
+        /* Keywords */
+        .code-keyword {
+            color: var(--code-keyword);
+        }
+        
+        /* Functions */
+        .code-function {
+            color: var(--code-function);
+        }
+        
+        /* Strings */
+        .code-string {
+            color: var(--code-string);
+        }
+        
+        /* Comments */
+        .code-comment {
+            color: var(--code-comment);
+        }
+        
+        /* Numbers */
+        .code-number {
+            color: var(--code-number);
+        }
+        
+        /* Types */
+        .code-type {
+            color: var(--code-type);
+        }
+        
+        /* Preprocessor */
+        .code-preprocessor {
+            color: var(--code-preprocessor);
+        }
+        
+        /* Operators */
+        .code-operator {
+            color: var(--code-operator);
+        }
+
+        /* Apply to code blocks */
+        pre code .keyword { color: var(--code-keyword); }
+        pre code .function { color: var(--code-function); }
+        pre code .string { color: var(--code-string); }
+        pre code .comment { color: var(--code-comment); }
+        pre code .number { color: var(--code-number); }
+        pre code .type { color: var(--code-type); }
+        pre code .preprocessor { color: var(--code-preprocessor); }
+        pre code .operator { color: var(--code-operator); }
 
         .inline-code {
             background: var(--bg-tertiary);
@@ -374,6 +430,10 @@
 
         .example-box.danger {
             border-left-color: var(--accent-danger);
+        }
+
+        .example-box.success {
+            border-left-color: var(--accent-success);
         }
 
         /* ===== Tags ===== */
@@ -518,7 +578,7 @@
                 </button>
                 <div class="logo">
                     <i class="fas fa-brain"></i>
-                    <span>CM Library <span class="version">v4.2.2</span></span>
+                    <span>CM Library <span class="version">v4.2.3</span></span>
                 </div>
             </div>
             <div class="theme-toggle" id="themeToggle">
@@ -567,7 +627,7 @@
                         <i class="fas fa-crown"></i>
                         <h3>CM Library - C Multitask Intelligent Framework</h3>
                     </div>
-                    <p><strong>Author:</strong> Adham Hossam | <strong>Version:</strong> 4.2.2 | <strong>License:</strong> MIT</p>
+                    <p><strong>Author:</strong> Adham Hossam | <strong>Version:</strong> 4.2.3 | <strong>License:</strong> MIT</p>
                     <p>A comprehensive C framework bringing modern programming paradigms to C:</p>
                     <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
                         <span class="tag tag-feature"><i class="fas fa-check"></i> Dual Memory System</span>
@@ -587,44 +647,43 @@
                     <i class="fas fa-hourglass-start"></i>
                     <span>Quick Start</span>
                 </div>
-                <pre><code>// main.c - Complete working example
-#include "CM.h"
+                <pre><code><span class="preprocessor">#include</span> <span class="string">"CM.h"</span>
 
-int main() {
-    // Initialize library (automatic via constructor)
-    CM_ABOUT();  // Display banner
+<span class="type">int</span> <span class="function">main</span>() {
+    <span class="comment">// Initialize library (automatic via constructor)</span>
+    <span class="function">CM_ABOUT</span>();  <span class="comment">// Display banner</span>
     
-    // String manipulation
-    String* message = String_new("Hello, CM Library!");
-    message->upper(message);
-    message->print(message);
-    printf("\nLength: %d\n", message->length_func(message));
+    <span class="comment">// 🔷 Create a string</span>
+    String* message = <span class="function">String_new</span>(<span class="string">"Hello, CM Library!"</span>);
+    message-><span class="function">upper</span>(message);
+    message-><span class="function">print</span>(message);
+    <span class="function">printf</span>(<span class="string">"\nLength: %d\n"</span>, message-><span class="function">length_func</span>(message));
     
-    // Array usage
-    Array* numbers = Array_new(sizeof(int), 5);
-    for(int i = 0; i < 10; i++) {
-        numbers->push(numbers, &i);
+    <span class="comment">// Array usage</span>
+    Array* numbers = <span class="function">Array_new</span>(<span class="keyword">sizeof</span>(<span class="type">int</span>), <span class="number">5</span>);
+    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i < <span class="number">10</span>; i++) {
+        numbers-><span class="function">push</span>(numbers, &i);
     }
     
-    // Map usage
-    Map* config = Map_new();
-    int port = 8080;
-    config->set(config, "port", &port);
+    <span class="comment">// Map usage</span>
+    Map* config = <span class="function">Map_new</span>();
+    <span class="type">int</span> port = <span class="number">8080</span>;
+    config-><span class="function">set</span>(config, <span class="string">"port"</span>, &port);
     
-    // Cleanup
-    String_delete(message);
-    Array_delete(numbers);
-    Map_delete(config);
+    <span class="comment">// Cleanup</span>
+    <span class="function">String_delete</span>(message);
+    <span class="function">Array_delete</span>(numbers);
+    <span class="function">Map_delete</span>(config);
     
-    // Show GC statistics
-    CM_REPORT();
+    <span class="comment">// Show GC statistics</span>
+    <span class="function">CM_REPORT</span>();
     
-    return 0;
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
                 <div class="example-box">
                     <i class="fas fa-terminal"></i>
                     <strong>Compilation:</strong>
-                    <pre style="margin: 0.5rem 0 0; background: transparent; padding: 0;">gcc main.c CM.c -o program -lpthread -lm</pre>
+                    <pre style="margin: 0.5rem 0 0; background: transparent; padding: 0;"><code>gcc main.c CM.c -o program -lpthread -lm</code></pre>
                 </div>
             </section>
 
@@ -664,7 +723,7 @@ int main() {
                 </div>
             </section>
 
-            <!-- Arena Allocator with Issues -->
+            <!-- Arena Allocator -->
             <section id="arena-allocator" class="section fade-in">
                 <div class="section-title">
                     <i class="fas fa-tachometer-alt"></i>
@@ -673,52 +732,55 @@ int main() {
                 
                 <div class="example-box">
                     <h4>✅ Correct Usage</h4>
-                    <pre><code>CMArena* arena = cm_arena_create(1024 * 1024);
-cm_arena_push(arena);
+                    <pre><code>CMArena* arena = <span class="function">cm_arena_create</span>(<span class="number">1024</span> * <span class="number">1024</span>);
+<span class="function">cm_arena_push</span>(arena);
 
-// Allocations from arena
-char* buffer = (char*)cm_alloc(512, "temp", __FILE__, __LINE__);
-int* numbers = (int*)cm_alloc(100 * sizeof(int), "temp", __FILE__, __LINE__);
+<span class="comment">// Allocations from arena</span>
+<span class="type">char</span>* buffer = (<span class="type">char</span>*)<span class="function">cm_alloc</span>(<span class="number">512</span>, <span class="string">"temp"</span>, __FILE__, __LINE__);
+<span class="type">int</span>* numbers = (<span class="type">int</span>*)<span class="function">cm_alloc</span>(<span class="number">100</span> * <span class="keyword">sizeof</span>(<span class="type">int</span>), <span class="string">"temp"</span>, __FILE__, __LINE__);
 
-cm_arena_pop();
-cm_arena_destroy(arena);</code></pre>
+<span class="function">cm_arena_pop</span>();
+<span class="function">cm_arena_destroy</span>(arena);</code></pre>
                 </div>
 
                 <div class="example-box warning">
                     <h4>⚠️ CM_WITH_ARENA Macro Issues</h4>
-                    <pre><code>// PROBLEM: Memory leak on break/return
-CM_WITH_ARENA(4096) {
-    char* data = (char*)cm_alloc(100, "temp", __FILE__, __LINE__);
-    if (some_condition) {
-        break;  // ❌ Arena NOT destroyed! Memory leak!
+                    <pre><code><span class="comment">// PROBLEM: Memory leak on break/return</span>
+<span class="function">CM_WITH_ARENA</span>(<span class="number">4096</span>) {
+    <span class="type">char</span>* data = (<span class="type">char</span>*)<span class="function">cm_alloc</span>(<span class="number">100</span>, <span class="string">"temp"</span>, __FILE__, __LINE__);
+    <span class="keyword">if</span> (some_condition) {
+        <span class="keyword">break</span>;  <span class="comment">// ❌ Arena NOT destroyed! Memory leak!</span>
     }
-    if (error) {
-        return; // ❌ Arena NOT destroyed! Memory leak!
+    <span class="keyword">if</span> (error) {
+        <span class="keyword">return</span>; <span class="comment">// ❌ Arena NOT destroyed! Memory leak!</span>
     }
-} // Arena destroyed only on normal exit</code></pre>
+} <span class="comment">// Arena destroyed only on normal exit</span></code></pre>
                     <p><strong>Issue:</strong> The macro doesn't handle early exits. Arena persists if break/return used.</p>
                 </div>
 
-                <div class="example-box">
-                    <h4>✅ Safe Arena Pattern</h4>
-                    <pre><code>// Solution 1: Manual control
-CMArena* temp = cm_arena_create(4096);
-cm_arena_push(temp);
+                <div class="example-box success">
+                    <h4>✅ Fixed in v4.2.2</h4>
+                    <pre><code><span class="comment">// New macro - safe with break/return</span>
+<span class="preprocessor">#define</span> CM_WITH_ARENA(size) \
+    <span class="keyword">for</span> (CMArena* _a __attribute__((cleanup(cm_arena_cleanup))) = <span class="function">cm_arena_create</span>(size); \
+         _a; _a = NULL) \
+        <span class="keyword">for</span> (<span class="type">int</span> _i = (cm_arena_push(_a), <span class="number">0</span>); _i < <span class="number">1</span>; _i++)
 
-// Your code here
-if (error) {
-    cm_arena_destroy(temp);  // Manual cleanup
-    return;
-}
-
-cm_arena_pop();
-cm_arena_destroy(temp);
-
-// Solution 2: Using cleanup attribute (GNU)
-#define CM_WITH_ARENA_SAFE(size) \
-    CMArena* _a __attribute__((cleanup(cm_arena_cleanup))) = cm_arena_create(size); \
-    if (_a) { cm_arena_push(_a); } \
-    for (int _i = (_a ? 1 : 0); _i < 1; _i++)</code></pre>
+<span class="comment">// Cleanup function in CM.c</span>
+<span class="type">void</span> <span class="function">cm_arena_cleanup</span>(<span class="type">void</span>* ptr) {
+    CMArena** arena_ptr = (CMArena**)ptr;
+    <span class="keyword">if</span> (*arena_ptr) {
+        <span class="function">pthread_mutex_lock</span>(&cm_mem.arena_lock);
+        cm_mem.current_arena = NULL;
+        <span class="function">pthread_mutex_unlock</span>(&cm_mem.arena_lock);
+        
+        <span class="function">cm_arena_destroy</span>(*arena_ptr);
+        *arena_ptr = NULL;
+        
+        <span class="function">printf</span>(<span class="string">"[ARENA] Cleanup auto-destroyed arena\n"</span>);
+    }
+}</code></pre>
+                    <p><strong>Now:</strong> The macro works with break, return, goto - no memory leaks!</p>
                 </div>
             </section>
 
@@ -728,16 +790,16 @@ cm_arena_destroy(temp);
                     <i class="fas fa-recycle"></i>
                     <span>Garbage Collector</span>
                 </div>
-                <pre><code>// Reference counting in action
-String* s1 = String_new("shared");
-String* s2 = s1;  // Both point to same object
-cm_retain(s2);    // Manual retain if needed
+                <pre><code><span class="comment">// Reference counting in action</span>
+String* s1 = <span class="function">String_new</span>(<span class="string">"shared"</span>);
+String* s2 = s1;  <span class="comment">// Both point to same object</span>
+<span class="function">cm_retain</span>(s2);    <span class="comment">// Manual retain if needed</span>
 
-cm_free(s1);      // ref_count-- (still alive)
-cm_free(s2);      // ref_count-- -> 0, object freed
+<span class="function">cm_free</span>(s1);      <span class="comment">// ref_count-- (still alive)</span>
+<span class="function">cm_free</span>(s2);      <span class="comment">// ref_count-- -> 0, object freed</span>
 
-// Manual GC collection
-cm_gc_collect();  // Forces mark & sweep</code></pre>
+<span class="comment">// Manual GC collection</span>
+<span class="function">cm_gc_collect</span>();  <span class="comment">// Forces mark & sweep</span></code></pre>
                 
                 <table class="table">
                     <tr><th>Function</th><th>Description</th><th>Thread Safety</th></tr>
@@ -748,7 +810,7 @@ cm_gc_collect();  // Forces mark & sweep</code></pre>
                 </table>
             </section>
 
-            <!-- String Class with Issues -->
+            <!-- String Class -->
             <section id="string-class" class="section fade-in">
                 <div class="section-title">
                     <i class="fas fa-font"></i>
@@ -756,45 +818,36 @@ cm_gc_collect();  // Forces mark & sweep</code></pre>
                 </div>
                 
                 <div class="example-box warning">
-                    <h4>⚠️ Issue: Confusing 'this' parameter name</h4>
-                    <pre><code>// Current implementation (problematic for C++)
-struct String {
-    char* data;
-    int length;
-    struct String* (*concat)(struct String* this, const char* other);
-    //                                    ^^^^ - not reserved but confusing
-};
-
-// Usage (works but naming is misleading)
-String* s = String_new("hello");
-s->concat(s, " world");  // Passing self twice!</code></pre>
+                    <h4>⚠️ Legacy Issue: Confusing 'this' parameter name</h4>
+                    <pre><code><span class="comment">// Old implementation (problematic for C++)</span>
+<span class="keyword">struct</span> String {
+    <span class="type">char</span>* data;
+    <span class="type">int</span> length;
+    <span class="keyword">struct</span> String* (*concat)(<span class="keyword">struct</span> String* <span class="keyword">this</span>, <span class="type">const</span> <span class="type">char</span>* other);
+};</code></pre>
                     <p><strong>Issue:</strong> Parameter name 'this' can conflict with C++ and is misleading.</p>
                 </div>
 
-                <div class="example-box">
-                    <h4>✅ Recommended Naming</h4>
-                    <pre><code>// Better: Use 'self' parameter name
-struct String {
-    char* data;
-    int length;
-    struct String* (*concat)(struct String* self, const char* other);
-    void (*print)(struct String* self);
-};
-
-// Clear usage
-String* s = String_new("hello");
-s->concat(s, " world");  // Still passing self, but parameter named self</code></pre>
+                <div class="example-box success">
+                    <h4>✅ Fixed in v4.2.2 - Using 'self'</h4>
+                    <pre><code><span class="comment">// New implementation - clear parameter names</span>
+<span class="keyword">struct</span> String {
+    <span class="type">char</span>* data;
+    <span class="type">int</span> length;
+    <span class="keyword">struct</span> String* (*concat)(<span class="keyword">struct</span> String* <span class="keyword">self</span>, <span class="type">const</span> <span class="type">char</span>* other);
+    <span class="type">void</span> (*print)(<span class="keyword">struct</span> String* <span class="keyword">self</span>);
+};</code></pre>
                 </div>
 
                 <h4>String API Examples</h4>
-                <pre><code>String* s = String_new("  Hello CM  ");
-s->upper(s);                    // "  HELLO CM  "
-s->lower(s);                    // "  hello cm  "
-s->concat(s, " Library!");      // "  hello cm  Library!"
-printf("Char at 2: %c\n", s->charAt(s, 2));
-printf("Length: %d\n", s->length_func(s));
-s->print(s);                    // Print to stdout
-String_delete(s);</code></pre>
+                <pre><code>String* s = <span class="function">String_new</span>(<span class="string">"  Hello CM  "</span>);
+s-><span class="function">upper</span>(s);                    <span class="comment">// "  HELLO CM  "</span>
+s-><span class="function">lower</span>(s);                    <span class="comment">// "  hello cm  "</span>
+s-><span class="function">concat</span>(s, <span class="string">" Library!"</span>);      <span class="comment">// "  hello cm  Library!"</span>
+<span class="function">printf</span>(<span class="string">"Char at 2: %c\n"</span>, s-><span class="function">charAt</span>(s, <span class="number">2</span>));
+<span class="function">printf</span>(<span class="string">"Length: %d\n"</span>, s-><span class="function">length_func</span>(s));
+s-><span class="function">print</span>(s);                    <span class="comment">// Print to stdout</span>
+<span class="function">String_delete</span>(s);</code></pre>
             </section>
 
             <!-- Array Class -->
@@ -803,22 +856,22 @@ String_delete(s);</code></pre>
                     <i class="fas fa-layer-group"></i>
                     <span>Array Class - Generic Container</span>
                 </div>
-                <pre><code>// Creating arrays for different types
-Array* ints = Array_new(sizeof(int), 10);
-Array* strings = Array_new(sizeof(String*), 5);
+                <pre><code><span class="comment">// Creating arrays for different types</span>
+Array* ints = <span class="function">Array_new</span>(<span class="keyword">sizeof</span>(<span class="type">int</span>), <span class="number">10</span>);
+Array* strings = <span class="function">Array_new</span>(<span class="keyword">sizeof</span>(String*), <span class="number">5</span>);
 
-// Adding elements
-int value = 42;
-ints->push(ints, &value);
+<span class="comment">// Adding elements</span>
+<span class="type">int</span> value = <span class="number">42</span>;
+ints-><span class="function">push</span>(ints, &value);
 
-// Retrieving elements
-int* retrieved = (int*)ints->get(ints, 0);
-printf("Value: %d\n", *retrieved);
+<span class="comment">// Retrieving elements</span>
+<span class="type">int</span>* retrieved = (<span class="type">int</span>*)ints-><span class="function">get</span>(ints, <span class="number">0</span>);
+<span class="function">printf</span>(<span class="string">"Value: %d\n"</span>, *retrieved);
 
-// Array info
-printf("Size: %d, Capacity: %d\n", ints->size(ints), ints->capacity);
+<span class="comment">// Array info</span>
+<span class="function">printf</span>(<span class="string">"Size: %d, Capacity: %d\n"</span>, ints-><span class="function">size</span>(ints), ints->capacity);
 
-Array_delete(ints);</code></pre>
+<span class="function">Array_delete</span>(ints);</code></pre>
             </section>
 
             <!-- Map Class -->
@@ -827,205 +880,299 @@ Array_delete(ints);</code></pre>
                     <i class="fas fa-map"></i>
                     <span>Map Class - Hash Table</span>
                 </div>
-                <pre><code>Map* config = Map_new();
+                <pre><code>Map* config = <span class="function">Map_new</span>();
 
-// Store different types
-int port = 3000;
-double timeout = 30.5;
-char* host = "localhost";
+<span class="comment">// Store different types</span>
+<span class="type">int</span> port = <span class="number">3000</span>;
+<span class="type">double</span> timeout = <span class="number">30.5</span>;
+<span class="type">char</span>* host = <span class="string">"localhost"</span>;
 
-config->set(config, "port", &port);
-config->set(config, "timeout", &timeout);
-config->set(config, "host", &host);
+config-><span class="function">set</span>(config, <span class="string">"port"</span>, &port);
+config-><span class="function">set</span>(config, <span class="string">"timeout"</span>, &timeout);
+config-><span class="function">set</span>(config, <span class="string">"host"</span>, &host);
 
-// Retrieve values
-int* p = (int*)config->get(config, "port");
-double* t = (double*)config->get(config, "timeout");
-char** h = (char**)config->get(config, "host");
+<span class="comment">// Retrieve values</span>
+<span class="type">int</span>* p = (<span class="type">int</span>*)config-><span class="function">get</span>(config, <span class="string">"port"</span>);
+<span class="type">double</span>* t = (<span class="type">double</span>*)config-><span class="function">get</span>(config, <span class="string">"timeout"</span>);
+<span class="type">char</span>** h = (<span class="type">char</span>**)config-><span class="function">get</span>(config, <span class="string">"host"</span>);
 
-printf("Port: %d\n", *p);
-printf("Timeout: %.1f\n", *t);
-printf("Host: %s\n", *h);
+<span class="function">printf</span>(<span class="string">"Port: %d\n"</span>, *p);
+<span class="function">printf</span>(<span class="string">"Timeout: %.1f\n"</span>, *t);
+<span class="function">printf</span>(<span class="string">"Host: %s\n"</span>, *h);
 
-// Check existence
-if (config->has(config, "port")) {
-    printf("Port configured\n");
+<span class="comment">// Check existence</span>
+<span class="keyword">if</span> (config-><span class="function">has</span>(config, <span class="string">"port"</span>)) {
+    <span class="function">printf</span>(<span class="string">"Port configured\n"</span>);
 }
 
-Map_delete(config);</code></pre>
+<span class="function">Map_delete</span>(config);</code></pre>
             </section>
 
-            <!-- Error Handling with Critical Issues -->
+            <!-- Error Handling -->
             <section id="error-handling" class="section fade-in">
                 <div class="section-title">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <span>Error Handling - CRITICAL ISSUES</span>
+                    <span>Error Handling - Thread-Safe Exceptions</span>
                 </div>
                 
                 <div class="example-box danger">
                     <h4>⚠️ CRITICAL: Thread Safety Issue with Exceptions</h4>
-                    <pre><code>// Current implementation (DANGEROUS in multi-threaded code)
-extern jmp_buf* cm_exception_buffer;  // Global variable - NOT thread safe!
+                    <pre><code><span class="comment">// Old implementation (DANGEROUS in multi-threaded code)</span>
+<span class="keyword">extern</span> jmp_buf* cm_exception_buffer;  <span class="comment">// Global variable - NOT thread safe!</span>
 
-#define CM_TRY() \
+<span class="preprocessor">#define</span> CM_TRY() \
     jmp_buf __cm_buf; \
-    cm_exception_buffer = &__cm_buf;  // Race condition in threads! \
-    if (setjmp(__cm_buf) == 0)
-
-#define CM_THROW(error, message) \
-    do { \
-        cm_last_error = error; \
-        strncpy(cm_error_message, message, sizeof(cm_error_message) - 1); \
-        if (cm_exception_buffer) { \
-            longjmp(*cm_exception_buffer, error);  // May jump to wrong thread's buffer! \
-        } \
-    } while(0)</code></pre>
-                    <p><strong>Issue:</strong> Global exception buffer causes crashes in multi-threaded code. One thread overwrites another thread's buffer.</p>
+    cm_exception_buffer = &__cm_buf;  <span class="comment">// Race condition in threads! \</span>
+    <span class="keyword">if</span> (setjmp(__cm_buf) == <span class="number">0</span>)</code></pre>
+                    <p><strong>Issue:</strong> Global exception buffer causes crashes in multi-threaded code.</p>
                 </div>
 
-                <div class="example-box">
-                    <h4>✅ Thread-Safe Solution</h4>
-                    <pre><code>// In CM.h
-extern __thread jmp_buf __cm_exception_buffer;  // Thread-local storage
+                <div class="example-box success">
+                    <h4>✅ Thread-Safe Solution in v4.2.2</h4>
+                    <pre><code><span class="comment">// In CM.h - Thread-local storage</span>
+<span class="keyword">extern</span> __thread jmp_buf* cm_exception_buffer;  <span class="comment">// Thread-local!</span>
 
-#define CM_TRY() \
+<span class="preprocessor">#define</span> CM_TRY() \
     jmp_buf __cm_buf; \
-    jmp_buf* cm_exception_buffer = &__cm_buf;  // Local pointer \
-    if (setjmp(__cm_buf) == 0)
+    jmp_buf* __old = cm_exception_buffer; \
+    cm_exception_buffer = &__cm_buf; \
+    <span class="keyword">if</span> (setjmp(__cm_buf) == <span class="number">0</span>)
 
-#define CM_THROW(error, message) \
-    do { \
-        cm_last_error = error; \
-        strncpy(cm_error_message, message, sizeof(cm_error_message) - 1); \
-        jmp_buf* buf_ptr = cm_exception_buffer; \
-        if (buf_ptr) { \
-            longjmp(*buf_ptr, error); \
-        } \
-    } while(0)</code></pre>
+<span class="preprocessor">#define</span> CM_CATCH() \
+    <span class="keyword">else</span> { cm_exception_buffer = __old; }</code></pre>
                 </div>
 
                 <h4>Basic Error Handling</h4>
-                <pre><code>cmTry {
-    int* ptr = NULL;
-    if (!ptr) {
-        cmThrow(CM_ERROR_NULL_POINTER, "Null pointer detected!");
+                <pre><code><span class="function">cmTry</span> {
+    <span class="type">int</span>* ptr = NULL;
+    <span class="keyword">if</span> (!ptr) {
+        <span class="function">cmThrow</span>(CM_ERROR_NULL_POINTER, <span class="string">"Null pointer detected!"</span>);
     }
-} cmCatch {
-    printf("Error %d: %s\n", cmErrorCode(), cmErrorMsg());
+} <span class="function">cmCatch</span> {
+    <span class="function">printf</span>(<span class="string">"Error %d: %s\n"</span>, <span class="function">cmErrorCode</span>(), <span class="function">cmErrorMsg</span>());
 }</code></pre>
-
-                <table class="table">
-                    <tr><th>Error Code</th><th>Description</th></tr>
-                    <tr><td>CM_SUCCESS</td><td>No error</td></tr>
-                    <tr><td>CM_ERROR_MEMORY</td><td>Memory allocation failed</td></tr>
-                    <tr><td>CM_ERROR_NULL_POINTER</td><td>Null pointer dereference</td></tr>
-                    <tr><td>CM_ERROR_OUT_OF_BOUNDS</td><td>Index out of bounds</td></tr>
-                    <tr><td>CM_ERROR_DIVISION_BY_ZERO</td><td>Division by zero</td></tr>
-                </table>
             </section>
 
-            <!-- OOP Macros with Issues -->
-<!-- OOP Macros - Enhanced Version -->
-<section id="oop-macros" class="section fade-in">
-    <div class="section-title">
-        <i class="fas fa-cubes"></i>
-        <span>OOP Macros - Enhanced (C++ Compatible)</span>
-    </div>
+            <!-- OOP Macros - Enhanced Version -->
+            <section id="oop-macros" class="section fade-in">
+                <div class="section-title">
+                    <i class="fas fa-cubes"></i>
+                    <span>OOP Macros - Enhanced (C++ Compatible)</span>
+                </div>
+                
+                <div class="example-box warning">
+                    <h4>⚠️ Legacy Issues: 'class' and 'this' keywords</h4>
+                    <pre><code><span class="comment">// Old implementation (problematic with C++)</span>
+<span class="preprocessor">#define</span> <span class="function">class</span>(name) <span class="keyword">typedef</span> <span class="keyword">struct</span> name name; <span class="keyword">struct</span> name
+<span class="preprocessor">#define</span> <span class="function">method</span>(class, func, return_type, ...) \
+    return_type (*func)(class* <span class="keyword">this</span>, ##__VA_ARGS__);  <span class="comment">// GNU extension</span></code></pre>
+                </div>
+
+                <div class="example-box success">
+                    <h4>✅ New Solution in v4.2.2</h4>
+                    <pre><code><span class="comment">// New version - C++ compatible and portable</span>
+<span class="preprocessor">#define</span> <span class="function">cmlass</span>(name) \
+    <span class="keyword">typedef</span> <span class="keyword">struct</span> name name; \
+    <span class="keyword">struct</span> name
+
+<span class="preprocessor">#define</span> end_class
+
+<span class="preprocessor">#define</span> <span class="function">property</span>(type, name) type name;
+
+<span class="comment">// For methods without parameters</span>
+<span class="preprocessor">#define</span> <span class="function">method0</span>(return_type, name) \
+    return_type (*name)(<span class="type">void</span>* self)
+
+<span class="comment">// For methods with parameters</span>
+<span class="preprocessor">#define</span> <span class="function">method</span>(return_type, name, ...) \
+    return_type (*name)(<span class="type">void</span>* self, __VA_ARGS__)
+
+<span class="comment">// Safe method caller - works with/without parameters</span>
+<span class="preprocessor">#define</span> <span class="function">send</span>(obj, method, ...) \
+    ((obj)->method ? (obj)->method(obj, ##__VA_ARGS__) : (<span class="type">void</span>)<span class="number">0</span>)</code></pre>
+                </div>
+
+                <h4>📝 New Usage Example:</h4>
+                <pre><code><span class="comment">// Class definition (using cmlass instead of class)</span>
+<span class="function">cmlass</span>(Person) {
+    <span class="function">property</span>(<span class="type">char</span>*, name);
+    <span class="function">property</span>(<span class="type">int</span>, age);
     
-    <div class="example-box warning">
-        <h4>⚠️ Legacy Issues: 'class' and 'this' keywords</h4>
-        <pre><code>// Old implementation (problematic with C++)
-#define class(name) typedef struct name name; struct name
-#define method(class, func, return_type, ...) \
-    return_type (*func)(class* this, ##__VA_ARGS__);  // GNU extension
-
-// Old usage
-class(Person) {
-    property(char*, name);
-    method(speak, void);  // Issue with zero-parameter methods
-} end_class;</code></pre>
-        <p><strong>Issues:</strong></p>
-        <ul>
-            <li><code>class</code> keyword is reserved in C++</li>
-            <li><code>##__VA_ARGS__</code> is a GNU extension (non-portable)</li>
-            <li><code>this</code> parameter name causes confusion</li>
-            <li>Methods without parameters don't work properly</li>
-        </ul>
-    </div>
-
-    <div class="example-box">
-        <h4>✅ New Solution in v4.2.2</h4>
-        <pre><code>// New version - C++ compatible and portable
-#define cmlass(name) \
-    typedef struct name name; \
-    struct name
-
-#define end_class
-
-#define property(type, name) type name;
-
-// For methods without parameters
-#define method0(return_type, name) \
-    return_type (*name)(void* self)
-
-// For methods with parameters
-#define method(return_type, name, ...) \
-    return_type (*name)(void* self, __VA_ARGS__)
-
-// Safe method caller - works with/without parameters
-#define send(obj, method, ...) \
-    ((obj)->method ? (obj)->method(obj, ##__VA_ARGS__) : (void)0)</code></pre>
-    </div>
-
-    <h4>📝 New Usage Example:</h4>
-    <pre><code>// Class definition (using cmlass instead of class)
-cmlass(Person) {
-    property(char*, name);
-    property(int, age);
-    
-    method0(void, introduce);           // No parameters
-    method(void, speak, const char* msg); // With parameter
+    <span class="function">method0</span>(<span class="type">void</span>, introduce);           <span class="comment">// No parameters</span>
+    <span class="function">method</span>(<span class="type">void</span>, speak, <span class="type">const</span> <span class="type">char</span>* msg); <span class="comment">// With parameter</span>
 } end_class;
 
-// Implementation
-void Person_introduce(void* ptr) {
+<span class="comment">// Implementation</span>
+<span class="type">void</span> <span class="function">Person_introduce</span>(<span class="type">void</span>* ptr) {
     Person* self = (Person*)ptr;
-    printf("Hi, I'm %s, age %d\n", self->name, self->age);
+    <span class="function">printf</span>(<span class="string">"Hi, I'm %s, age %d\n"</span>, self->name, self->age);
 }
 
-void Person_speak(void* ptr, const char* msg) {
+<span class="type">void</span> <span class="function">Person_speak</span>(<span class="type">void</span>* ptr, <span class="type">const</span> <span class="type">char</span>* msg) {
     Person* self = (Person*)ptr;
-    printf("%s says: %s\n", self->name, msg);
+    <span class="function">printf</span>(<span class="string">"%s says: %s\n"</span>, self->name, msg);
 }
 
-// Usage
-int main() {
-    Person p = {.name = "Adham", .age = 25};
+<span class="comment">// Usage</span>
+<span class="type">int</span> <span class="function">main</span>() {
+    Person p = {.name = <span class="string">"Adham"</span>, .age = <span class="number">25</span>};
     p.introduce = Person_introduce;
     p.speak = Person_speak;
     
-    send(&p, introduce);        // ✅ Works
-    send(&p, speak, "Hello");   // ✅ Works
+    <span class="function">send</span>(&p, introduce);        <span class="comment">// ✅ Works</span>
+    <span class="function">send</span>(&p, speak, <span class="string">"Hello"</span>);   <span class="comment">// ✅ Works</span>
     
-    return 0;
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
-    <div class="card-grid">
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-check-circle" style="color: #10b981;"></i>
-                <h3>New Features in v4.2.2</h3>
-            </div>
-            <ul style="list-style: none;">
-                <li><i class="fas fa-check" style="color: #10b981;"></i> C++ compatible (cmlass instead of class)</li>
-                <li><i class="fas fa-check" style="color: #10b981;"></i> Zero-parameter methods support (method0)</li>
-                <li><i class="fas fa-check" style="color: #10b981;"></i> No GNU extensions - fully portable</li>
-                <li><i class="fas fa-check" style="color: #10b981;"></i> Safe send macro (handles NULL methods)</li>
-                <li><i class="fas fa-check" style="color: #10b981;"></i> Clear parameter names (self)</li>
-            </ul>
-        </div>
-    </div>
-</section>
+                <!-- What's New in v4.2.3 -->
+                <div class="example-box success">
+                    <h4>🚀 Version 4.2.3 - Stability & Cross-Platform Hardening</h4>
+                    <p>This release focuses on final hardening, cross-platform compatibility (especially for Android), and squashing the last few bugs to ensure a smooth, warning-free experience across all environments.</p>
+                </div>
+
+                <div class="card-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-mobile-alt" style="color: #10b981;"></i>
+                            <h3>Complete Android Support</h3>
+                        </div>
+                        <ul style="list-style: none; padding: 0;">
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> Safe I/O functions with proper fallbacks</li>
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> <code>cm_error</code> now prints to console + logs</li>
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> <code>cm_gets</code> successfully reads user input</li>
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> Zero unused parameter warnings</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-shield-alt" style="color: #10b981;"></i>
+                            <h3>NULL-Safe Printing</h3>
+                        </div>
+                        <ul style="list-style: none; padding: 0;">
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> <code>cm_printf</code> handles NULL format strings</li>
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> <code>cm_error</code> handles NULL format strings</li>
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> No more crashes from invalid format args</li>
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> Graceful fallback on all platforms</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-broom" style="color: #10b981;"></i>
+                            <h3>Zero Warnings</h3>
+                        </div>
+                        <ul style="list-style: none; padding: 0;">
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> All compiler warnings fixed</li>
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> Explicit <code>(void)</code> casts for unused params</li>
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> Clean builds with <code>-Wall -Wextra</code></li>
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> Production-ready warning-free code</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card-grid" style="margin-top: 1rem;">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-print" style="color: #10b981;"></i>
+                            <h3>Reliable String Printing</h3>
+                        </div>
+                        <ul style="list-style: none; padding: 0;">
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> <code>string_print</code> uses direct <code>printf</code></li>
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> Guaranteed output on all systems</li>
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> Fixed string display issues</li>
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> Works on Android, Linux, Windows</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-code-branch" style="color: #10b981;"></i>
+                            <h3>Portable I/O</h3>
+                        </div>
+                        <ul style="list-style: none; padding: 0;">
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> I/O functions declared in <code>CM.h</code></li>
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> Available for general application use</li>
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> Consistent API across platforms</li>
+                            <li><i class="fas fa-check" style="color: #10b981;"></i> No internal linkage restrictions</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem;">✅ Bug Fixes in v4.2.3</h3>
+
+                <table class="table">
+                    <tr>
+                        <th>Issue</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                    </tr>
+                    <tr>
+                        <td><code>cm_printf</code> crash with NULL format string</td>
+                        <td><code>cm_printf</code></td>
+                        <td><span class="tag tag-fixed">✅ FIXED</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>cm_error</code> output not visible on Android</td>
+                        <td><code>cm_error</code></td>
+                        <td><span class="tag tag-fixed">✅ FIXED</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>cm_gets</code> failing to read input on Android</td>
+                        <td><code>cm_gets</code></td>
+                        <td><span class="tag tag-fixed">✅ FIXED</span></td>
+                    </tr>
+                    <tr>
+                        <td>Unused parameter warnings on Android</td>
+                        <td><code>cm_gets</code></td>
+                        <td><span class="tag tag-fixed">✅ FIXED</span></td>
+                    </tr>
+                    <tr>
+                        <td>String content not printing in <code>string_print</code></td>
+                        <td><code>string_print</code></td>
+                        <td><span class="tag tag-fixed">✅ FIXED</span></td>
+                    </tr>
+                    <tr>
+                        <td>Safe I/O functions not accessible from <code>main.c</code></td>
+                        <td>Header declarations</td>
+                        <td><span class="tag tag-fixed">✅ FIXED</span></td>
+                    </tr>
+                </table>
+
+                <div class="example-box" style="margin-top: 2rem;">
+                    <h4>📝 What's Next?</h4>
+                    <p>With version 4.2.3, the CM Library has achieved a state of high stability and cross-platform robustness. Future work will focus on:</p>
+                    <ul>
+                        <li>Expanding the collection of utility functions</li>
+                        <li>Adding more comprehensive examples and tutorials</li>
+                        <li>Performance benchmarking and optimization</li>
+                        <li>Community-driven feature requests</li>
+                    </ul>
+                </div>
+
+                <div class="example-box warning">
+                    <h4>🎯 Migration Guide from v4.2.2</h4>
+                    <p>This is a minor release focused on fixes and internal hardening. <strong>No breaking changes or API modifications</strong> are required. Simply drop in the new <code>CM.h</code> and <code>CM.c</code> files and recompile.</p>
+                </div>
+
+                <!-- Version History -->
+                <div class="card" style="margin-top: 1rem;">
+                    <div class="card-header">
+                        <i class="fas fa-history"></i>
+                        <h3>📦 Version History</h3>
+                    </div>
+                    <pre style="margin: 0.5rem 0;"><code>| Version | Date | Changes |
+|---------|------|---------|
+| 4.2.3   | 2026 | Complete Android support, NULL-safe printing, zero warnings, reliable string I/O |
+| 4.2.2   | 2026 | Thread-local exceptions, fixed arena cleanup, cmlass macro |
+| 4.2.1   | 2026 | Arena allocator, unified memory system |
+| 4.0.0   | 2026 | Thread safety, OOP macros |
+| 3.0.0   | 2026 | Complete rewrite, GC, classes |
+| 2.0.0   | 2025 | Basic memory tracking |
+| 1.0.0   | 2025 | Initial release |</code></pre>
+                </div>
+            </section>
 
             <!-- Thread Safety -->
             <section id="thread-safety" class="section fade-in">
@@ -1039,105 +1186,121 @@ int main() {
                     <tr><td>GC Allocations</td><td>✅ Safe</td><td>Protected by mutex</td></tr>
                     <tr><td>GC Collections</td><td>✅ Safe</td><td>Protected by mutex</td></tr>
                     <tr><td>Arena Operations</td><td>✅ Safe</td><td>Protected by mutex</td></tr>
-                    <tr><td>String Operations</td><td>⚠️ Conditional</td><td>Safe if using GC functions</td></tr>
-                    <tr><td>Array Operations</td><td>⚠️ Conditional</td><td>Safe if using GC functions</td></tr>
-                    <tr><td>Map Operations</td><td>⚠️ Conditional</td><td>Safe if using GC functions</td></tr>
-                    <tr><td>Exception Handling</td><td>❌ UNSAFE</td><td>Global buffer - use thread-local fix</td></tr>
+                    <tr><td>String Operations</td><td>✅ Safe</td><td>Using GC functions</td></tr>
+                    <tr><td>Array Operations</td><td>✅ Safe</td><td>Using GC functions</td></tr>
+                    <tr><td>Map Operations</td><td>✅ Safe</td><td>Using GC functions</td></tr>
+                    <tr><td>Exception Handling</td><td>✅ Safe</td><td>Thread-local storage (v4.2.2+)</td></tr>
                 </table>
 
                 <div class="example-box">
                     <h4>Thread-Safe Example</h4>
-                    <pre><code>#include <pthread.h>
-#include "CM.h"
+                    <pre><code><span class="preprocessor">#include</span> <span class="string">&lt;pthread.h&gt;</span>
+<span class="preprocessor">#include</span> <span class="string">"CM.h"</span>
 
-void* thread_func(void* arg) {
-    // Each thread gets its own exception buffer (if using thread-local fix)
-    cmTry {
-        String* s = String_new("Thread-safe string");
-        s->print(s);
-        String_delete(s);
-    } cmCatch {
-        printf("Thread error: %s\n", cmErrorMsg());
+<span class="type">void</span>* <span class="function">thread_func</span>(<span class="type">void</span>* arg) {
+    <span class="comment">// Each thread gets its own exception buffer (thread-local)</span>
+    <span class="function">cmTry</span> {
+        String* s = <span class="function">String_new</span>(<span class="string">"Thread-safe string"</span>);
+        s-><span class="function">print</span>(s);
+        <span class="function">String_delete</span>(s);
+    } <span class="function">cmCatch</span> {
+        <span class="function">printf</span>(<span class="string">"Thread error: %s\n"</span>, <span class="function">cmErrorMsg</span>());
     }
-    return NULL;
+    <span class="keyword">return</span> NULL;
 }
 
-int main() {
+<span class="type">int</span> <span class="function">main</span>() {
     pthread_t t1, t2;
-    pthread_create(&t1, NULL, thread_func, NULL);
-    pthread_create(&t2, NULL, thread_func, NULL);
-    pthread_join(t1, NULL);
-    pthread_join(t2, NULL);
-    return 0;
+    <span class="function">pthread_create</span>(&t1, NULL, thread_func, NULL);
+    <span class="function">pthread_create</span>(&t2, NULL, thread_func, NULL);
+    <span class="function">pthread_join</span>(t1, NULL);
+    <span class="function">pthread_join</span>(t2, NULL);
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
                 </div>
             </section>
 
-            <!-- Known Issues - Complete List -->
+            <!-- Known Issues - Updated for v4.2.3 -->
             <section id="known-issues" class="section fade-in">
                 <div class="section-title">
                     <i class="fas fa-bug"></i>
                     <span>Known Issues & Limitations</span>
                 </div>
 
-<table class="table">
-    <tr>
-        <th>Issue</th>
-        <th>Severity</th>
-        <th>Location</th>
-        <th>Description</th>
-        <th>Solution</th>
-        <th>Status in v4.2.2</th>
-    </tr>
-    <tr>
-        <td>Global exception buffer</td>
-        <td><span class="issue-severity severity-critical">CRITICAL</span></td>
-        <td>CM_TRY/CM_THROW</td>
-        <td>Global jmp_buf pointer causes crashes in multi-threaded code.</td>
-        <td>Use thread-local storage (__thread)</td>
-        <td><span class="tag tag-fixed">✅ FIXED</span></td>
-    </tr>
-    <tr>
-        <td>CM_WITH_ARENA macro leak</td>
-        <td><span class="issue-severity severity-high">HIGH</span></td>
-        <td>arena macros</td>
-        <td>break/continue/return inside macro prevents arena destruction</td>
-        <td>Use cleanup attribute</td>
-        <td><span class="tag tag-fixed">✅ FIXED</span></td>
-    </tr>
-    <tr>
-        <td>this parameter name</td>
-        <td><span class="issue-severity severity-medium">MEDIUM</span></td>
-        <td>OOP macros</td>
-        <td>Parameter name 'this' conflicts with C++</td>
-        <td>Use 'self' instead</td>
-        <td><span class="tag tag-fixed">✅ FIXED</span></td>
-    </tr>
-    <tr>
-        <td>##__VA_ARGS__ extension</td>
-        <td><span class="issue-severity severity-medium">MEDIUM</span></td>
-        <td>method macro</td>
-        <td>Uses GNU extension, not portable</td>
-        <td>Use standard variadic macros</td>
-        <td><span class="tag tag-fixed">✅ FIXED</span></td>
-    </tr>
-    <tr>
-        <td>class keyword conflict</td>
-        <td><span class="issue-severity severity-medium">MEDIUM</span></td>
-        <td>OOP macros</td>
-        <td>'class' is reserved in C++</td>
-        <td>Use 'cmlass' instead</td>
-        <td><span class="tag tag-fixed">✅ FIXED</span></td>
-    </tr>
-    <tr>
-        <td>Methods without parameters</td>
-        <td><span class="issue-severity severity-medium">MEDIUM</span></td>
-        <td>method macro</td>
-        <td>Can't define methods with zero parameters</td>
-        <td>Use method0 macro</td>
-        <td><span class="tag tag-fixed">✅ FIXED</span></td>
-    </tr>
-</table>
+                <table class="table">
+                    <tr>
+                        <th>Issue</th>
+                        <th>Severity</th>
+                        <th>Location</th>
+                        <th>Description</th>
+                        <th>Solution</th>
+                        <th>Status in v4.2.3</th>
+                    </tr>
+                    <tr>
+                        <td>Global exception buffer</td>
+                        <td><span class="issue-severity severity-critical">CRITICAL</span></td>
+                        <td>CM_TRY/CM_THROW</td>
+                        <td>Global jmp_buf pointer causes crashes in multi-threaded code.</td>
+                        <td>Use thread-local storage (__thread)</td>
+                        <td><span class="tag tag-fixed">✅ FIXED</span></td>
+                    </tr>
+                    <tr>
+                        <td>CM_WITH_ARENA macro leak</td>
+                        <td><span class="issue-severity severity-high">HIGH</span></td>
+                        <td>arena macros</td>
+                        <td>break/continue/return inside macro prevents arena destruction</td>
+                        <td>Use cleanup attribute</td>
+                        <td><span class="tag tag-fixed">✅ FIXED</span></td>
+                    </tr>
+                    <tr>
+                        <td>this parameter name</td>
+                        <td><span class="issue-severity severity-medium">MEDIUM</span></td>
+                        <td>OOP macros</td>
+                        <td>Parameter name 'this' conflicts with C++</td>
+                        <td>Use 'self' instead</td>
+                        <td><span class="tag tag-fixed">✅ FIXED</span></td>
+                    </tr>
+                    <tr>
+                        <td>##__VA_ARGS__ extension</td>
+                        <td><span class="issue-severity severity-medium">MEDIUM</span></td>
+                        <td>method macro</td>
+                        <td>Uses GNU extension, not portable</td>
+                        <td>Use standard variadic macros</td>
+                        <td><span class="tag tag-fixed">✅ FIXED</span></td>
+                    </tr>
+                    <tr>
+                        <td>class keyword conflict</td>
+                        <td><span class="issue-severity severity-medium">MEDIUM</span></td>
+                        <td>OOP macros</td>
+                        <td>'class' is reserved in C++</td>
+                        <td>Use 'cmlass' instead</td>
+                        <td><span class="tag tag-fixed">✅ FIXED</span></td>
+                    </tr>
+                    <tr>
+                        <td>Methods without parameters</td>
+                        <td><span class="issue-severity severity-medium">MEDIUM</span></td>
+                        <td>method macro</td>
+                        <td>Can't define methods with zero parameters</td>
+                        <td>Use method0 macro</td>
+                        <td><span class="tag tag-fixed">✅ FIXED</span></td>
+                    </tr>
+                    <tr>
+                        <td>Android I/O issues</td>
+                        <td><span class="issue-severity severity-medium">MEDIUM</span></td>
+                        <td>cm_printf/cm_gets</td>
+                        <td>Printf not working, fgets failing on Android</td>
+                        <td>Safe I/O functions with fallbacks</td>
+                        <td><span class="tag tag-fixed">✅ FIXED</span></td>
+                    </tr>
+                    <tr>
+                        <td>String printing issues</td>
+                        <td><span class="issue-severity severity-low">LOW</span></td>
+                        <td>string_print</td>
+                        <td>Strings not displaying on some systems</td>
+                        <td>Direct printf usage</td>
+                        <td><span class="tag tag-fixed">✅ FIXED</span></td>
+                    </tr>
+                </table>
             </section>
 
             <!-- Solutions & Best Practices -->
@@ -1153,14 +1316,14 @@ int main() {
                             <i class="fas fa-shield-alt"></i>
                             <h3>Exception Safety</h3>
                         </div>
-                        <pre style="margin: 0.5rem 0;">// Thread-local exception handling
+                        <pre style="margin: 0.5rem 0;"><code><span class="comment">// Thread-local exception handling (v4.2.2+)</span>
 __thread jmp_buf __thread_buffer;
 
-#define THREAD_TRY() \
+<span class="preprocessor">#define</span> THREAD_TRY() \
     jmp_buf __local_buf; \
     jmp_buf* __old = &__thread_buffer; \
     __thread_buffer = __local_buf; \
-    if (setjmp(__local_buf) == 0)</code></pre>
+    <span class="keyword">if</span> (setjmp(__local_buf) == <span class="number">0</span>)</code></pre>
                     </div>
 
                     <div class="card">
@@ -1168,18 +1331,11 @@ __thread jmp_buf __thread_buffer;
                             <i class="fas fa-broom"></i>
                             <h3>Arena Safety</h3>
                         </div>
-                        <pre style="margin: 0.5rem 0;">// Always use manual control
-CMArena* arena = cm_arena_create(size);
-cm_arena_push(arena);
-
-// Your code with proper cleanup
-if (error) {
-    cm_arena_destroy(arena);
-    return;
-}
-
-cm_arena_pop();
-cm_arena_destroy(arena);</code></pre>
+                        <pre style="margin: 0.5rem 0;"><code><span class="comment">// Use CM_WITH_ARENA for automatic cleanup (v4.2.2+)</span>
+<span class="function">CM_WITH_ARENA</span>(<span class="number">4096</span>) {
+    <span class="comment">// Your temporary allocations here</span>
+    <span class="comment">// Auto-cleaned even with break/return!</span>
+}</code></pre>
                     </div>
 
                     <div class="card">
@@ -1187,22 +1343,16 @@ cm_arena_destroy(arena);</code></pre>
                             <i class="fas fa-code"></i>
                             <h3>Portable OOP</h3>
                         </div>
-                        <pre style="margin: 0.5rem 0;">// Avoid macro magic
-typedef struct {
-    char* data;
-    int length;
-    void (*print)(void* self);
-} String;
-
-void String_print(void* self) {
-    String* s = (String*)self;
-    printf("%s", s->data);
-}</code></pre>
+                        <pre style="margin: 0.5rem 0;"><code><span class="comment">// Use cmlass instead of class (v4.2.2+)</span>
+<span class="function">cmlass</span>(MyClass) {
+    <span class="function">property</span>(<span class="type">int</span>, value);
+    <span class="function">method0</span>(<span class="type">void</span>, process);
+} end_class;</code></pre>
                     </div>
                 </div>
             </section>
 
-            <!-- Complete Examples -->
+            <!-- Complete Examples (kept as before) -->
             <section id="examples" class="section fade-in">
                 <div class="section-title">
                     <i class="fas fa-code"></i>
@@ -1210,207 +1360,90 @@ void String_print(void* self) {
                 </div>
 
                 <h3>Example 1: Student Management System</h3>
-                <pre><code>#include "CM.h"
+                <pre><code><span class="preprocessor">#include</span> <span class="string">"CM.h"</span>
 
-typedef struct {
+<span class="keyword">typedef</span> <span class="keyword">struct</span> {
     String* name;
-    int age;
-    double gpa;
+    <span class="type">int</span> age;
+    <span class="type">double</span> gpa;
 } Student;
 
-Student* Student_new(const char* name, int age, double gpa) {
-    Student* s = (Student*)cm_alloc(sizeof(Student), "Student", __FILE__, __LINE__);
-    s->name = String_new(name);
+Student* <span class="function">Student_new</span>(<span class="type">const</span> <span class="type">char</span>* name, <span class="type">int</span> age, <span class="type">double</span> gpa) {
+    Student* s = (Student*)<span class="function">cm_alloc</span>(<span class="keyword">sizeof</span>(Student), <span class="string">"Student"</span>, __FILE__, __LINE__);
+    s->name = <span class="function">String_new</span>(name);
     s->age = age;
     s->gpa = gpa;
-    return s;
+    <span class="keyword">return</span> s;
 }
 
-void Student_delete(Student* s) {
-    if (!s) return;
-    String_delete(s->name);
-    cm_free(s);
+<span class="type">void</span> <span class="function">Student_delete</span>(Student* s) {
+    <span class="keyword">if</span> (!s) <span class="keyword">return</span>;
+    <span class="function">String_delete</span>(s->name);
+    <span class="function">cm_free</span>(s);
 }
 
-void Student_print(Student* s) {
-    printf("Student: ");
-    s->name->print(s->name);
-    printf(", Age: %d, GPA: %.2f\n", s->age, s->gpa);
+<span class="type">void</span> <span class="function">Student_print</span>(Student* s) {
+    <span class="function">printf</span>(<span class="string">"Student: "</span>);
+    s->name-><span class="function">print</span>(s->name);
+    <span class="function">printf</span>(<span class="string">", Age: %d, GPA: %.2f\n"</span>, s->age, s->gpa);
 }
 
-int main() {
-    CM_ABOUT();
+<span class="type">int</span> <span class="function">main</span>() {
+    <span class="function">CM_ABOUT</span>();
     
-    // Create students
-    Student* students[3];
-    students[0] = Student_new("Adham Hossam", 25, 3.8);
-    students[1] = Student_new("John Doe", 22, 3.5);
-    students[2] = Student_new("Jane Smith", 23, 3.9);
+    <span class="comment">// Create students</span>
+    Student* students[<span class="number">3</span>];
+    students[<span class="number">0</span>] = <span class="function">Student_new</span>(<span class="string">"Adham Hossam"</span>, <span class="number">25</span>, <span class="number">3.8</span>);
+    students[<span class="number">1</span>] = <span class="function">Student_new</span>(<span class="string">"John Doe"</span>, <span class="number">22</span>, <span class="number">3.5</span>);
+    students[<span class="number">2</span>] = <span class="function">Student_new</span>(<span class="string">"Jane Smith"</span>, <span class="number">23</span>, <span class="number">3.9</span>);
     
-    // Process students
-    for(int i = 0; i < 3; i++) {
-        Student_print(students[i]);
+    <span class="comment">// Process students</span>
+    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i < <span class="number">3</span>; i++) {
+        <span class="function">Student_print</span>(students[i]);
     }
     
-    // Cleanup
-    for(int i = 0; i < 3; i++) {
-        Student_delete(students[i]);
+    <span class="comment">// Cleanup</span>
+    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i < <span class="number">3</span>; i++) {
+        <span class="function">Student_delete</span>(students[i]);
     }
     
-    CM_REPORT();
-    return 0;
+    <span class="function">CM_REPORT</span>();
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
                 <h3>Example 2: Arena-Based Temporary Processing</h3>
-                <pre><code>#include "CM.h"
+                <pre><code><span class="preprocessor">#include</span> <span class="string">"CM.h"</span>
 
-void process_batch(int batch_size) {
-    // Arena for temporary allocations - automatically freed
-    CMArena* temp = cm_arena_create(1024 * 1024);  // 1MB arena
-    cm_arena_push(temp);
+<span class="type">void</span> <span class="function">process_batch</span>(<span class="type">int</span> batch_size) {
+    <span class="comment">// Arena for temporary allocations - automatically freed</span>
+    CMArena* temp = <span class="function">cm_arena_create</span>(<span class="number">1024</span> * <span class="number">1024</span>);  <span class="comment">// 1MB arena</span>
+    <span class="function">cm_arena_push</span>(temp);
     
-    int* data = (int*)cm_alloc(batch_size * sizeof(int), "temp", __FILE__, __LINE__);
+    <span class="type">int</span>* data = (<span class="type">int</span>*)<span class="function">cm_alloc</span>(batch_size * <span class="keyword">sizeof</span>(<span class="type">int</span>), <span class="string">"temp"</span>, __FILE__, __LINE__);
     
-    // Process data
-    for(int i = 0; i < batch_size; i++) {
+    <span class="comment">// Process data</span>
+    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i < batch_size; i++) {
         data[i] = i * i;
     }
     
-    // Calculate average
-    double sum = 0;
-    for(int i = 0; i < batch_size; i++) {
+    <span class="comment">// Calculate average</span>
+    <span class="type">double</span> sum = <span class="number">0</span>;
+    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i < batch_size; i++) {
         sum += data[i];
     }
-    printf("Batch average: %.2f\n", sum / batch_size);
+    <span class="function">printf</span>(<span class="string">"Batch average: %.2f\n"</span>, sum / batch_size);
     
-    // Arena automatically frees ALL memory
-    cm_arena_pop();
-    cm_arena_destroy(temp);
+    <span class="comment">// Arena automatically frees ALL memory</span>
+    <span class="function">cm_arena_pop</span>();
+    <span class="function">cm_arena_destroy</span>(temp);
 }
 
-int main() {
-    for(int i = 0; i < 10; i++) {
-        process_batch(1000);  // No memory leaks!
+<span class="type">int</span> <span class="function">main</span>() {
+    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i < <span class="number">10</span>; i++) {
+        <span class="function">process_batch</span>(<span class="number">1000</span>);  <span class="comment">// No memory leaks!</span>
     }
-    return 0;
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
-
-                <h3>Example 3: Thread-Safe Request Handler</h3>
-                <pre><code>#include "CM.h"
-#include <pthread.h>
-#include <unistd.h>
-
-typedef struct {
-    String* method;
-    String* path;
-    Map* headers;
-    String* body;
-} Request;
-
-Request* Request_new(const char* method, const char* path) {
-    Request* req = (Request*)cm_alloc(sizeof(Request), "Request", __FILE__, __LINE__);
-    req->method = String_new(method);
-    req->path = String_new(path);
-    req->headers = Map_new();
-    req->body = NULL;
-    return req;
-}
-
-void Request_delete(Request* req) {
-    if (!req) return;
-    String_delete(req->method);
-    String_delete(req->path);
-    Map_delete(req->headers);
-    if (req->body) String_delete(req->body);
-    cm_free(req);
-}
-
-void* handle_request(void* arg) {
-    Request* req = (Request*)arg;
-    
-    // Thread-local exception handling
-    jmp_buf __local_buf;
-    jmp_buf* old_buf = cm_exception_buffer;
-    cm_exception_buffer = &__local_buf;
-    
-    if (setjmp(__local_buf) == 0) {
-        // Process request
-        printf("Processing: ");
-        req->method->print(req->method);
-        printf(" ");
-        req->path->print(req->path);
-        printf("\n");
-        
-        // Add header
-        char* content_type = "application/json";
-        req->headers->set(req->headers, "Content-Type", &content_type);
-    } else {
-        printf("Error processing request: %s\n", cm_error_get_message());
-    }
-    
-    cm_exception_buffer = old_buf;
-    Request_delete(req);
-    return NULL;
-}
-
-int main() {
-    pthread_t threads[5];
-    
-    for(int i = 0; i < 5; i++) {
-        Request* req = Request_new("GET", "/api/data");
-        pthread_create(&threads[i], NULL, handle_request, req);
-    }
-    
-    for(int i = 0; i < 5; i++) {
-        pthread_join(threads[i], NULL);
-    }
-    
-    return 0;
-}</code></pre>
-
-<div class="example-box">
-    <h4>🆕 v4.2.2 Improvements in Error Handling</h4>
-    <pre><code>// In CM.h - New version with thread-local storage
-extern __thread jmp_buf* cm_exception_buffer;  // Thread-local!
-
-#define CM_TRY() \
-    jmp_buf __cm_buf; \
-    jmp_buf* __old = cm_exception_buffer; \
-    cm_exception_buffer = &__cm_buf; \
-    if (setjmp(__cm_buf) == 0)
-
-#define CM_CATCH() \
-    else { cm_exception_buffer = __old; }
-
-// In CM.c
-__thread jmp_buf* cm_exception_buffer = NULL;  // ✅ Thread-local</code></pre>
-    <p><strong>Improvements:</strong> Each thread has its own exception buffer - no conflicts, no crashes!</p>
-</div>
-
-<div class="example-box success">
-    <h4>✅ Fixed in v4.2.2</h4>
-    <pre><code>// New macro - safe with break/return
-#define CM_WITH_ARENA(size) \
-    for (CMArena* _a __attribute__((cleanup(cm_arena_cleanup))) = cm_arena_create(size); \
-         _a; _a = NULL) \
-        for (int _i = (cm_arena_push(_a), 0); _i < 1; _i++)
-
-// Cleanup function in CM.c
-void cm_arena_cleanup(void* ptr) {
-    CMArena** arena_ptr = (CMArena**)ptr;
-    if (*arena_ptr) {
-        pthread_mutex_lock(&cm_mem.arena_lock);
-        cm_mem.current_arena = NULL;
-        pthread_mutex_unlock(&cm_mem.arena_lock);
-        
-        cm_arena_destroy(*arena_ptr);
-        *arena_ptr = NULL;
-        
-        printf("[ARENA] Cleanup auto-destroyed arena\n");
-    }
-}</code></pre>
-    <p><strong>Now:</strong> The macro works with break, return, goto - no memory leaks!</p>
-</div>
             </section>
 
             <!-- API Reference -->
@@ -1494,15 +1527,23 @@ void cm_arena_cleanup(void* ptr) {
                     <tr><td>CM_ABOUT()</td><td>Display library info</td></tr>
                     <tr><td>CM_REPORT()</td><td>Show GC statistics</td></tr>
                 </table>
+
+                <h3>Safe I/O Functions (v4.2.3+)</h3>
+                <table class="table">
+                    <tr><th>Function</th><th>Description</th></tr>
+                    <tr><td>void cm_printf(const char* format, ...)</td><td>Safe printf with NULL handling</td></tr>
+                    <tr><td>void cm_error(const char* format, ...)</td><td>Safe error printing with Android support</td></tr>
+                    <tr><td>char* cm_gets(char* buffer, size_t size)</td><td>Safe input reading with fallbacks</td></tr>
+                </table>
             </section>
 
-            <!-- Footer -->
+            <!-- Footer - Updated to v4.2.3 -->
             <section style="margin-top: 3rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border);">
                 <i class="fas fa-cube" style="font-size: 3rem; color: var(--accent-info); opacity: 0.5;"></i>
                 <p style="margin-top: 1rem; color: var(--text-muted);">
-                    CM Library v4.2.2 by Adham Hossam<br>
-MIT License - 2026<br>
-Version 4.2.2: ✅ Thread-safe | ✅ Arena cleanup | ✅ C++ Compatible
+                    CM Library v4.2.3 by Adham Hossam<br>
+                    MIT License - 2026<br>
+                    Version 4.2.3: ✅ Thread-safe | ✅ Arena cleanup | ✅ C++ Compatible | ✅ Android Support | ✅ Zero Warnings
                     <span class="tag"><i class="fab fa-github"></i> ALightbolt4G/CM</span>
                 </p>
             </section>
