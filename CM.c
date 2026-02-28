@@ -35,6 +35,106 @@
 #include "CM.h"
 
 /* ============================================================================
+ * SAFE I/O FUNCTIONS - مع fallback لجميع المنصات
+ * ============================================================================ */
+#ifndef CM_SAFE_IO_H
+#define CM_SAFE_IO_H
+
+// للـ Android
+#ifdef __ANDROID__
+#include <android/log.h>
+#define CM_LOG_TAG "CM"
+#endif
+
+// طباعة عادية (مع fallback)
+// طباعة عادية (مع fallback)
+void cm_printf(const char* format, ...) {
+    if (!format) return;
+    
+    va_list args;
+    va_start(args, format);
+    
+    #ifdef __ANDROID__
+        // على Android، نستخدم printf العادي
+        vprintf(format, args);
+        fflush(stdout);
+    #else
+        if (stdout) {
+            vprintf(format, args);
+            fflush(stdout);
+        }
+    #endif
+    
+    va_end(args);
+}
+
+// طباعة أخطاء (مع fallback)
+// طباعة أخطاء (مع fallback وظهور على الشاشة في Android)
+void cm_error(const char* format, ...) {
+    if (!format) return;  // ✅ التحقق من NULL
+    
+    va_list args;
+    va_start(args, format);
+    
+    #ifdef __ANDROID__
+        // 1. طباعة على logcat (للتصحيح)
+        __android_log_vprint(ANDROID_LOG_ERROR, CM_LOG_TAG, format, args);
+        
+        // 2. إعادة الـ va_list للبداية
+        va_end(args);
+        va_start(args, format);
+        
+        // 3. طباعة على stdout (لتظهر على الشاشة)
+        printf("❌ ERROR: ");
+        vprintf(format, args);
+        printf("\n");
+        fflush(stdout);
+    #else
+        if (stderr) {
+            vfprintf(stderr, format, args);
+            fprintf(stderr, "\n");
+        } else if (stdout) {
+            printf("ERROR: ");
+            vprintf(format, args);
+            printf("\n");
+        }
+    #endif
+    
+    va_end(args);
+}
+
+// قراءة مدخلات (مع fallback)
+// قراءة مدخلات (مع fallback)
+char* cm_gets(char* buffer, size_t size) {
+    if (!buffer || size == 0) return NULL;  // ✅ التحقق من المعاملات
+    
+    #ifdef __ANDROID__
+        // على Android، نحاول قراءة من stdin أولاً
+        if (stdin) {
+            char* result = fgets(buffer, size, stdin);
+            if (result) {
+                // إزالة newline من النهاية
+                buffer[strcspn(buffer, "\n")] = 0;
+                return result;
+            }
+        }
+        (void)buffer;  // لمنع تحذير unused parameter
+        (void)size;    // لمنع تحذير unused parameter
+        return NULL;   // فشل القراءة
+    #else
+        if (stdin) {
+            char* result = fgets(buffer, size, stdin);
+            if (result) {
+                buffer[strcspn(buffer, "\n")] = 0;
+                return result;
+            }
+        }
+        return NULL;
+    #endif
+}
+#endif
+
+/* ============================================================================
  * INTERNAL STRUCTURES (المعرفة محلياً فقط)
  * ============================================================================ */
 // هذا الـ struct غير موجود في CM.h所以要定义在这里
@@ -129,8 +229,8 @@ void* cm_alloc(size_t size, const char* type, const char* file, int line) {
         }
 
         /* Fallback mechanism if the current arena is exhausted */
-        fprintf(stderr, "[ARENA] Warning: Arena '%s' full, falling back to GC\n", 
-                cm_mem.current_arena->name);
+        cm_error("[ARENA] Warning: Arena '%s' full, falling back to GC", 
+         cm_mem.current_arena->name);
     }
     void* ptr = malloc(size);
     if (!ptr) return NULL;
@@ -227,7 +327,7 @@ void cm_free(void* ptr) {
 void cm_gc_collect(void) {
     pthread_mutex_lock(&cm_mem.gc_lock);
 
-    printf("[GC] Starting collection...\n");
+    cm_printf("[GC] Starting collection...\n");
 
     for (CMObject* obj = cm_mem.head; obj; obj = obj->next) {
         obj->marked = (obj->ref_count > 0) ? 1 : 0;
@@ -273,8 +373,7 @@ void cm_gc_collect(void) {
     cm_mem.gc_last_collection = freed_memory;
     cm_mem.collections++;
 
-    printf("[GC] Completed: freed %d objects (%zu bytes)\n", 
-           freed_objects, freed_memory);
+cm_printf("[GC] Completed: freed %d objects (%zu bytes)\n", freed_objects, freed_memory);
 
     pthread_mutex_unlock(&cm_mem.gc_lock);
 }
@@ -282,46 +381,40 @@ void cm_gc_collect(void) {
 void cm_gc_stats(void) {
     pthread_mutex_lock(&cm_mem.gc_lock);
 
-    printf("\n");
-    printf("══════════════════════════════════════════════════════════════\n");
-    printf("              GARBAGE COLLECTOR STATISTICS\n");
-    printf("──────────────────────────────────────────────────────────────\n");
-    printf("  Total objects    │ %20zu\n", cm_mem.total_objects);
-    printf("  Total memory     │ %20zu bytes\n", cm_mem.total_memory);
-    printf("  Peak memory      │ %20zu bytes\n", cm_mem.peak_memory);
-    printf("  Allocations      │ %20zu\n", cm_mem.allocations);
-    printf("  Frees            │ %20zu\n", cm_mem.frees);
-    printf("  Collections      │ %20zu\n", cm_mem.collections);
-    printf("──────────────────────────────────────────────────────────────\n");
-    printf("  Avg collection   │ %19.3f ms\n", cm_mem.avg_collection_time * 1000);
-    printf("  Last freed       │ %20zu bytes\n", cm_mem.gc_last_collection);
+    cm_printf("\n");
+cm_printf("══════════════════════════════════════════════════════════════\n");
+cm_printf("              GARBAGE COLLECTOR STATISTICS\n");
+cm_printf("──────────────────────────────────────────────────────────────\n");
+cm_printf("  Total objects    │ %20zu\n", cm_mem.total_objects);
+cm_printf("  Total memory     │ %20zu bytes\n", cm_mem.total_memory);
+cm_printf("  Peak memory      │ %20zu bytes\n", cm_mem.peak_memory);
+cm_printf("  Allocations      │ %20zu\n", cm_mem.allocations);
+cm_printf("  Frees            │ %20zu\n", cm_mem.frees);
+cm_printf("  Collections      │ %20zu\n", cm_mem.collections);
+cm_printf("──────────────────────────────────────────────────────────────\n");
+cm_printf("  Avg collection   │ %19.3f ms\n", cm_mem.avg_collection_time * 1000);
+cm_printf("  Last freed       │ %20zu bytes\n", cm_mem.gc_last_collection);
+if (cm_mem.current_arena) {
+    cm_printf("──────────────────────────────────────────────────────────────\n");
+    cm_printf("  ARENA STATISTICS\n");
+    cm_printf("  Arena name       │ %20s\n", cm_mem.current_arena->name);
+    cm_printf("  Arena size       │ %20zu bytes\n", cm_mem.current_arena->block_size);
+    cm_printf("  Arena used       │ %20zu bytes\n", cm_mem.current_arena->offset);
+    cm_printf("  Arena peak       │ %20zu bytes\n", cm_mem.current_arena->peak_usage);
+}
+cm_printf("══════════════════════════════════════════════════════════════\n");
+if (cm_mem.total_objects > 0 && CM_LOG_LEVEL >= 3) {
+    cm_printf("\nACTIVE OBJECTS:\n");
+    cm_printf("──────────────────────────────────────────────────────────────\n");
 
-    // ✅ عرض معلومات Arena لو موجودة
-    if (cm_mem.current_arena) {
-        printf("──────────────────────────────────────────────────────────────\n");
-        printf("  ARENA STATISTICS\n");
-        printf("  Arena name       │ %20s\n", cm_mem.current_arena->name);
-        printf("  Arena size       │ %20zu bytes\n", cm_mem.current_arena->block_size);
-        printf("  Arena used       │ %20zu bytes\n", cm_mem.current_arena->offset);
-        printf("  Arena peak       │ %20zu bytes\n", cm_mem.current_arena->peak_usage);
+int i=0;
+    for (CMObject* obj = cm_mem.head; obj; obj = obj->next) {
+        cm_printf("  [%d] %s (%zu bytes) at %s:%d [refs: %d]\n",
+                  ++i, obj->type ? obj->type : "unknown",
+                  obj->size, obj->file ? obj->file : "unknown",
+                  obj->line, obj->ref_count);
     }
-
-    printf("══════════════════════════════════════════════════════════════\n");
-
-    if (cm_mem.total_objects > 0 && CM_LOG_LEVEL >= 3) {
-        printf("\nACTIVE OBJECTS:\n");
-        printf("──────────────────────────────────────────────────────────────\n");
-        int i = 0;
-        for (CMObject* obj = cm_mem.head; obj; obj = obj->next) {
-            printf("  [%d] %s (%zu bytes) at %s:%d [refs: %d]\n",
-                   ++i,
-                   obj->type ? obj->type : "unknown",
-                   obj->size,
-                   obj->file ? obj->file : "unknown",
-                   obj->line,
-                   obj->ref_count);
-        }
-    }
+}
 
     pthread_mutex_unlock(&cm_mem.gc_lock);
 }
@@ -355,7 +448,7 @@ void cm_arena_cleanup(void* ptr) {
         cm_arena_destroy(*arena_ptr);
         *arena_ptr = NULL;
         
-        printf("[ARENA] Cleanup auto-destroyed arena\n"); // لل debugging
+        cm_printf("[ARENA] Cleanup auto-destroyed arena\n");
     }
 }
 
@@ -782,45 +875,48 @@ void cm_random_string(char* buffer, size_t length) {
  * ============================================================================ */
 
 // ===== String Class Implementation =====
-String* string_concat(String* this, const char* other) {
-    if (!this || !other) return this;
-    int new_len = this->length + strlen(other);
+String* string_concat(String* self, const char* other) {
+    if (!self || !other) return self;
+    int new_len = self->length + strlen(other);
     char* new_data = (char*)cm_alloc(new_len + 1, "string_data", __FILE__, __LINE__);
-    strcpy(new_data, this->data);
+    strcpy(new_data, self->data);
     strcat(new_data, other);
-    cm_free(this->data);
-    this->data = new_data;
-    this->length = new_len;
-    return this;
+    cm_free(self->data);
+    self->data = new_data;
+    self->length = new_len;
+    return self;
 }
 
-String* string_upper(String* this) {
-    if (!this || !this->data) return this;
-    for (int i = 0; i < this->length; i++) {
-        this->data[i] = toupper(this->data[i]);
+String* string_upper(String* self) {
+    if (!self || !self->data) return self;
+    for (int i = 0; i < self->length; i++) {
+        self->data[i] = toupper(self->data[i]);
     }
-    return this;
+    return self;
 }
 
-String* string_lower(String* this) {
-    if (!this || !this->data) return this;
-    for (int i = 0; i < this->length; i++) {
-        this->data[i] = tolower(this->data[i]);
+String* string_lower(String* self) {
+    if (!self || !self->data) return self;
+    for (int i = 0; i < self->length; i++) {
+        self->data[i] = tolower(self->data[i]);
     }
-    return this;
+    return self;
 }
 
-void string_print(String* this) {
-    if (this && this->data) printf("%s", this->data);
+void string_print(String* self) {
+    if (self && self->data) {
+        printf("%s", self->data);  // ✅ استخدام printf مباشرة
+        fflush(stdout);
+    }
 }
 
-int string_length(String* this) {
-    return this ? this->length : 0;
+int string_length(String* self) {
+    return self ? self->length : 0;
 }
 
-char string_charAt(String* this, int index) {
-    if (!this || !this->data || index < 0 || index >= this->length) return '\0';
-    return this->data[index];
+char string_charAt(String* self, int index) {
+    if (!self || !self->data || index < 0 || index >= self->length) return '\0';
+    return self->data[index];
 }
 
 String* String_new(const char* initial) {
@@ -851,37 +947,37 @@ void String_delete(String* self) {
 }
 
 // ===== Array Class Implementation =====
-Array* array_push(Array* this, void* value) {
-    if (!this || !value) return this;
+Array* array_push(Array* self, void* value) {
+    if (!self || !value) return self;
 
-    if (this->length >= this->capacity) {
-        int new_cap = this->capacity * 2;
-        void* new_data = cm_alloc(this->element_size * new_cap, "array_data", __FILE__, __LINE__);
-        memcpy(new_data, this->data, this->element_size * this->length);
-        cm_free(this->data);
-        this->data = new_data;
-        this->capacity = new_cap;
+    if (self->length >= self->capacity) {
+        int new_cap = self->capacity * 2;
+        void* new_data = cm_alloc(self->element_size * new_cap, "array_data", __FILE__, __LINE__);
+        memcpy(new_data, self->data, self->element_size * self->length);
+        cm_free(self->data);
+        self->data = new_data;
+        self->capacity = new_cap;
     }
 
-    void* dest = (char*)this->data + (this->length * this->element_size);
-    memcpy(dest, value, this->element_size);
-    this->length++;
-    return this;
+    void* dest = (char*)self->data + (self->length * self->element_size);
+    memcpy(dest, value, self->element_size);
+    self->length++;
+    return self;
 }
 
-void* array_pop(Array* this) {
-    if (!this || this->length == 0) return NULL;
-    this->length--;
-    return (char*)this->data + (this->length * this->element_size);
+void* array_pop(Array* self) {
+    if (!self || self->length == 0) return NULL;
+    self->length--;
+    return (char*)self->data + (self->length * self->element_size);
 }
 
-void* array_get(Array* this, int index) {
-    if (!this || index < 0 || index >= this->length) return NULL;
-    return (char*)this->data + (index * this->element_size);
+void* array_get(Array* self, int index) {
+    if (!self || index < 0 || index >= self->length) return NULL;
+    return (char*)self->data + (index * self->element_size);
 }
 
-int array_size(Array* this) {
-    return this ? this->length : 0;
+int array_size(Array* self) {
+    return self ? self->length : 0;
 }
 
 Array* Array_new(int element_size, int capacity) {
@@ -907,25 +1003,25 @@ void Array_delete(Array* self) {
 }
 
 // ===== Map Class Implementation =====
-Map* map_set(Map* this, const char* key, void* value) {
-    if (!this || !key || !value) return this;
-    cm_map_set((cm_map_t*)this->map_data, key, value, sizeof(void*));
-    this->size = cm_map_size((cm_map_t*)this->map_data);
-    return this;
+Map* map_set(Map* self, const char* key, void* value) {
+    if (!self || !key || !value) return self;
+    cm_map_set((cm_map_t*)self->map_data, key, value, sizeof(void*));
+    self->size = cm_map_size((cm_map_t*)self->map_data);
+    return self;
 }
 
-void* map_get(Map* this, const char* key) {
-    if (!this || !key) return NULL;
-    return cm_map_get((cm_map_t*)this->map_data, key);
+void* map_get(Map* self, const char* key) {
+    if (!self || !key) return NULL;
+    return cm_map_get((cm_map_t*)self->map_data, key);
 }
 
-int map_has(Map* this, const char* key) {
-    if (!this || !key) return 0;
-    return cm_map_has((cm_map_t*)this->map_data, key);
+int map_has(Map* self, const char* key) {
+    if (!self || !key) return 0;
+    return cm_map_has((cm_map_t*)self->map_data, key);
 }
 
-int map_size_func(Map* this) {
-    return this ? this->size : 0;
+int map_size_func(Map* self) {
+    return self ? self->size : 0;
 }
 
 Map* Map_new(void) {
@@ -953,12 +1049,12 @@ void Map_delete(Map* self) {
  * ============================================================================ */
 String* cm_input(const char* prompt) {
     if (prompt) {
-        printf("%s", prompt);
+        cm_printf("%s", prompt);
         fflush(stdout);
     }
 
     char buffer[1024]; 
-    if (fgets(buffer, sizeof(buffer), stdin)) {
+    if (cm_gets(buffer, sizeof(buffer))) {
         buffer[strcspn(buffer, "\n")] = 0;
         return String_new(buffer);
     }
@@ -971,7 +1067,7 @@ String* cm_input(const char* prompt) {
 __attribute__((constructor)) void cm_init_all(void) {
     cm_gc_init();
     cm_random_seed((unsigned int)time(NULL));
-    printf("\n🔷 [CM] Library v%s initialized by %s\n", CM_VERSION, CM_AUTHOR);
+    cm_printf("\n🔷 [CM] Library v%s initialized by %s\n", CM_VERSION, CM_AUTHOR);
 }
 
 __attribute__((destructor)) void cm_cleanup_all(void) {
@@ -984,10 +1080,10 @@ __attribute__((destructor)) void cm_cleanup_all(void) {
     cm_gc_collect();
 
     if (cm_mem.total_objects > 0) {
-        printf("\n⚠️ [CM] Warning: %zu objects still alive\n", cm_mem.total_objects);
+        cm_printf("\n⚠️ [CM] Warning: %zu objects still alive\n", cm_mem.total_objects);
         cm_gc_stats();
     } else {
-        printf("\n✅ [CM] Clean shutdown - all memory recovered!\n");
+        cm_printf("\n✅ [CM] Clean shutdown - all memory recovered!\n");
     }
 
     pthread_mutex_destroy(&cm_mem.gc_lock);
