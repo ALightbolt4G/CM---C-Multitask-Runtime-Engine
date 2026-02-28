@@ -376,6 +376,13 @@ const char* cm_error_get_message(void);
 int cm_error_get_last(void);
 void cm_error_clear(void);
 void cm_error_set(int error, const char* message);
+/* ============================================================================
+ * SAFE I/O FUNCTIONS - للاستخدام العام
+ * ============================================================================ */
+void cm_printf(const char* format, ...);
+void cm_error(const char* format, ...);
+char* cm_gets(char* buffer, size_t size);
+
 
 /* Short Macros */
 #define cmAlloc(sz) cm_alloc(sz, "object", __FILE__, __LINE__)
